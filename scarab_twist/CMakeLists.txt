@@ -6,6 +6,10 @@ find_package(Curses)
 
 catkin_package(CATKIN_DEPENDS roscpp DEPENDS Curses)
 
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+
 add_executable(joy_to_twist src/joy_to_twist.cpp)
 target_link_libraries(joy_to_twist ${catkin_LIBRARIES})
 

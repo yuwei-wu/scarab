@@ -192,7 +192,7 @@ int station_dump_callback(struct nl_msg *msg, void *arg)
   return NL_SKIP;
 }
 
-inline struct nl_handle *nl_socket_alloc(void)
+/*inline struct nl_handle *nl_socket_alloc(void)
 {
   return nl_handle_alloc();
 }
@@ -201,7 +201,8 @@ inline void nl_socket_free(struct nl_sock *h)
 {
   nl_handle_destroy(h);
 }
-
+*/
+/*
 inline int __genl_ctrl_alloc_cache(struct nl_sock *h, struct nl_cache **cache)
 {
   struct nl_cache *tmp = genl_ctrl_alloc_cache(h);
@@ -211,6 +212,7 @@ inline int __genl_ctrl_alloc_cache(struct nl_sock *h, struct nl_cache **cache)
   return 0;
 }
 #define genl_ctrl_alloc_cache __genl_ctrl_alloc_cache
+*/
 
 int nl80211_init(struct nl80211_state *state)
 {

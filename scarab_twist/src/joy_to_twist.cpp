@@ -1,7 +1,7 @@
 #include <iostream>
-#include "ros/ros.h"
-#include "geometry_msgs/Twist.h"
-#include "sensor_msgs/Joy.h"
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Joy.h>
 
 using namespace std;
 
@@ -26,7 +26,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& msg)
 //  double w = (fabs(w_analog) > fabs(w_digital))?w_analog:w_digital;
   double v = v_analog;
   double w = flip_angular ? -w_analog: w_analog;
-  
+
   twist.linear.x  = v;
   twist.angular.z = w;
   pub.publish(twist);
@@ -35,7 +35,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& msg)
 bool spin()
 {
   ros::Rate r(20);
-  while(node->ok()) 
+  while(node->ok())
   {
     ros::spinOnce();
     r.sleep();
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   node->param("flip", flip_angular, false);
   node->param("input_topic", input_topic, std::string("joy"));
   node->param("output_topic", output_topic, std::string("twist"));
-  
+
   ros::Subscriber sub1 = n.subscribe(input_topic, 10, joy_callback);
   pub = n.advertise<geometry_msgs::Twist>(output_topic, 10);
 
