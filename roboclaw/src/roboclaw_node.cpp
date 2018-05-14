@@ -59,7 +59,15 @@ public:
     ser_.reset(new USBSerial());
     openUsb();
     claw_.reset(new RoboClaw(ser_.get()));
+
     setupClaw();
+
+    char ver[255];
+    bool ret = claw_->ReadVersion(address_, ver);
+    if(ret){
+      std::string version(ver);
+      ROS_ERROR("Version: %s", version.c_str());
+    }
 
     pub_ = nh_.advertise<roboclaw::motor_state>("motor_state", 5);
     setVel(0.0, 0.0);
