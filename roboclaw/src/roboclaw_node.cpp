@@ -49,8 +49,10 @@ public:
 
     // Hardware parameters
     nh_.param("left_sign", left_sign_, -1);
-    nh_.param("right_sign", right_sign_, 1);
+    nh_.param("right_sign", right_sign_, -1);
     nh_.param("portname", portname_, std::string("/dev/roboclaw"));
+    nh_.param("address", address_, 0x80);
+
     nh_.param("address", address_, 0x80);
 
     ser_.reset(new USBSerial());
@@ -61,7 +63,10 @@ public:
     pub_ = nh_.advertise<roboclaw::motor_state>("motor_state", 5);
     setVel(0.0, 0.0);
 
-    duty_per_qpps_ = 512.0 / 300000;
+    qpps_ = 250000; //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
+
+    duty_per_qpps_ = 512.0 / qpps_;
+
   }
 
   ~DifferentialDriver() {
@@ -98,6 +103,11 @@ public:
       }
       setupClaw();
     }
+
+    claw_->ResetEncoders(address_);
+
+    claw_->SetM1VelocityPID(address_, pid_p_, pid_i_, pid_d_, qpps_);
+    claw_->SetM2VelocityPID(address_, pid_p_, pid_i_, pid_d_, qpps_);
 
     // Kinematics
     motor_to_wheel_ratio_ = config.motor_to_wheel_ratio;
@@ -166,7 +176,7 @@ public:
     }*/
 
     // Reset error terms if large change in velocities or stopping.
-    if (fabs(state_.v_sp - v) > pid_error_reset_v_step_threshold_ || 
+    if (fabs(state_.v_sp - v) > pid_error_reset_v_step_threshold_ ||
         fabs(state_.w_sp - w) > pid_error_reset_w_step_threshold_ ||
         (vmag < pid_error_reset_min_v_ && wmag < pid_error_reset_min_w_)) {
       pid_left_.reset();
@@ -198,7 +208,8 @@ public:
     bool valid;
 
     try {
-      speed = claw_->ReadISpeedM1(address_, &status, &valid) * 125;
+      //speed = claw_->ReadISpeedM1(address_, &status, &valid) * 125;
+      speed = claw_->ReadSpeedM1(address_, &status, &valid);
     } catch (USBSerial::Exception &e) {
       ROS_INFO("Problem reading motor 1 speed (error=%s)", e.what());
       serialError();
@@ -217,7 +228,8 @@ public:
     }
 
     try {
-      speed = claw_->ReadISpeedM2(address_, &status, &valid) * 125;
+      //speed = claw_->ReadISpeedM2(address_, &status, &valid) * 125;
+      speed = claw_->ReadSpeedM2(address_, &status, &valid);
     } catch(USBSerial::Exception &e) {
       ROS_INFO("Problem reading motor 2 speed (error=%s)", e.what());
       serialError();
@@ -274,12 +286,14 @@ public:
     if (state_.right_qpps_sp == 0) {
       state_.right_duty = 0;
     }
+
     if (abs(state_.left_duty) > 500.0) {
       state_.left_duty = copysign(500.0, state_.left_duty);
     }
     if (abs(state_.right_duty) > 500.0) {
       state_.right_duty = copysign(500.0, state_.right_duty);
     }
+
 
     double dlimit = 10;
     double left_diff = state_.left_duty - prev_left;
@@ -294,9 +308,25 @@ public:
 
     uint16_t m1duty = left_sign_*state_.left_duty;
     uint16_t m2duty = right_sign_*state_.right_duty;
-    // ROS_INFO("%i %i %f %f", (int16_t)m1duty, (int16_t)m2duty,
-    //          left_sign_*state_.left_duty, right_sign_*state_.right_duty);
-    claw_->DutyM1M2(address_, m1duty, m2duty);
+
+    //ROS_ERROR("%i %i %f %f", (int16_t)m1duty, (int16_t)m2duty,
+    //         left_sign_*state_.left_duty, right_sign_*state_.right_duty);
+
+    //ROS_ERROR("Setpoint QPPS %f %f",
+    //          left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
+
+    //old method using duty cycle
+    //claw_->DutyM1M2(address_, m1duty, m2duty);
+
+    //float Kp_fp, Ki_fp, Kd_fp;
+    //uint32_t qpps;
+    //claw_->ReadM1VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
+    //ROS_ERROR("M1 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
+
+    //claw_->ReadM2VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
+    //ROS_ERROR("M2 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
+
+    claw_->SpeedM1M2(address_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
     last_cmd_time_ = ros::Time::now();
 
     // ROS_INFO_STREAM("" << state_);
@@ -353,6 +383,8 @@ private:
   string portname_;
   int address_;
   int serial_errs_;
+
+  uint32_t qpps_; //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
 
   double axle_width_;
   double wheel_diam_;
