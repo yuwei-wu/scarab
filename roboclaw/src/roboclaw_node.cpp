@@ -5,7 +5,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "ros/ros.h"
+#include <ros/ros.h>
+#include <ros/console.h>
 
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/Twist.h"
@@ -63,7 +64,8 @@ public:
     pub_ = nh_.advertise<roboclaw::motor_state>("motor_state", 5);
     setVel(0.0, 0.0);
 
-    qpps_ = 250000; //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
+    //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
+    qpps_ = 250000;
 
     duty_per_qpps_ = 512.0 / qpps_;
 
@@ -314,6 +316,7 @@ public:
 
     //ROS_ERROR("Setpoint QPPS %f %f",
     //          left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
+    //ROS_ERROR_STREAM("max acc " << accel_max_quad_);
 
     //old method using duty cycle
     //claw_->DutyM1M2(address_, m1duty, m2duty);
@@ -326,7 +329,7 @@ public:
     //claw_->ReadM2VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
     //ROS_ERROR("M2 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
 
-    claw_->SpeedM1M2(address_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
+    claw_->SpeedAccelM1M2(address_, accel_max_quad_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
     last_cmd_time_ = ros::Time::now();
 
     // ROS_INFO_STREAM("" << state_);
