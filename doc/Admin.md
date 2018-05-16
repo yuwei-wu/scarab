@@ -35,6 +35,9 @@ Copy network interfaces and wpa_supplicant file
 cd ~/Downloads
 #wget https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config/
 cd config
+```
+Change the ip to reflect scarab id (example scarab44 will be 192.168.131.144)
+```
 sudo cp interfaces /etc/network/
 sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
 ```
@@ -78,6 +81,10 @@ git clone https://github.com/KumarRobotics/scarab.git
 cd scarab
 git checkout -t origin/devel_cleanup
 catkin build
+```
+
+Change the AGENT to reflect the current scarab id
+```
 echo "export AGENT=scarab44" >> ~/.bashrc
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
