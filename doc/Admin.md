@@ -33,10 +33,10 @@ https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config
 Copy network interfaces and wpa_supplicant file
 ```
 cd ~/Downloads
-#wget https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config/
-cd config
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/wpa_supplicant.conf
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/interfaces
 ```
-Change the ip to reflect scarab id (example scarab44 will be 192.168.131.44, replace all ips)
+Change the ip in interfaces file to reflect scarab id (example scarab44 will be 192.168.131.44, replace all ips)
 ```
 sudo cp interfaces /etc/network/
 sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
@@ -44,6 +44,7 @@ sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
 
 Copy udev rules for setting USB persissions
 ```
+https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/99-scarab.rules
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
 cd ..
