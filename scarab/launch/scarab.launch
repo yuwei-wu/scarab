@@ -1,0 +1,17 @@
+<launch>
+
+  <arg name="agent" value="$(env AGENT)" />
+
+  <arg name="base_frame_id" value="base" />
+  <arg name="odom_frame_id" value="odom" />
+  <arg name="global_frame_id" value="/map" />
+
+  <arg name="diagnostics" value="true" />
+  <arg name="diag_rate" default="0.4" />
+
+  <!-- Launch UTM30 Laser, motors (roboclaw), battery monitor, diagnostics-->
+  <include file="$(find scarab)/launch/system.launch">
+    <arg name="agent" value="$(arg agent)" />
+  </include>
+
+</launch>

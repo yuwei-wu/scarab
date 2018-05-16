@@ -1,0 +1,38 @@
+<launch>
+
+  <arg name="agent" default="$(env AGENT)" />
+
+  <arg name="base_frame_id" value="base" />
+  <arg name="odom_frame_id" value="odom" />
+  <arg name="global_frame_id" value="/map" />
+
+  <group ns="$(arg agent)">
+    <node name="laser" pkg="urg_node" type="urg_node" output="screen">
+      <param name="ip_address" value=""/>
+      <param name="serial_port" value="/dev/hokuyo"/>
+      <param name="serial_baud" value="115200"/>
+      <param name="frame_id" value="laser"/>
+      <param name="calibrate_time" value="true"/>
+      <param name="publish_intensity" value="false"/>
+      <param name="publish_multiecho" value="false"/>
+      <param name="angle_min" value="-2.1"/>
+      <param name="angle_max" value="2.1"/>
+      <remap from="/diagnostics" to="laser_diagnostics" />
+      <param name="cluster" value="1" />
+      <param name="skip" value="1" />
+      <param name="intensity" value="false" />
+    </node>
+
+    <node pkg="roboclaw" type="roboclaw_node" name="motor">
+      <param name="broadcast_tf" value="false" />
+      <param name="left_sign" value="1" />
+      <param name="right_sign" value="-1" />
+      <param name="pid_p" value="0.9" />
+      <param name="pid_i" value="0.0" />
+      <param name="pid_d" value="0.0" />
+      <param name="pid_iclamp" value="300" />
+      <param name="portname" value="/dev/roboclaw" />
+    </node>
+  </group>
+
+</launch>

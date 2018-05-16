@@ -319,25 +319,28 @@ public:
     uint16_t m1duty = left_sign_*state_.left_duty;
     uint16_t m2duty = right_sign_*state_.right_duty;
 
-    //ROS_ERROR("%i %i %f %f", (int16_t)m1duty, (int16_t)m2duty,
-    //         left_sign_*state_.left_duty, right_sign_*state_.right_duty);
+    /*
+    ROS_ERROR("** %i %i %f %f", (int16_t)m1duty, (int16_t)m2duty,
+             left_sign_*state_.left_duty, right_sign_*state_.right_duty);
 
-    //ROS_ERROR("Setpoint QPPS %f %f",
-    //          left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
-    //ROS_ERROR_STREAM("max acc " << accel_max_quad_);
+    ROS_ERROR("Setpoint QPPS %f %f",
+              left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
+    ROS_ERROR_STREAM("max acc " << accel_max_quad_);
+
+    float Kp_fp, Ki_fp, Kd_fp;
+    uint32_t qpps;
+    claw_->ReadM1VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
+    ROS_ERROR("M1 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
+
+    claw_->ReadM2VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
+    ROS_ERROR("M2 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
+    */
 
     //old method using duty cycle
     //claw_->DutyM1M2(address_, m1duty, m2duty);
-
-    //float Kp_fp, Ki_fp, Kd_fp;
-    //uint32_t qpps;
-    //claw_->ReadM1VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
-    //ROS_ERROR("M1 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
-
-    //claw_->ReadM2VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
-    //ROS_ERROR("M2 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
-
+    //claw_->SpeedM1M2(address_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
     claw_->SpeedAccelM1M2(address_, accel_max_quad_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
+
     last_cmd_time_ = ros::Time::now();
 
     // ROS_INFO_STREAM("" << state_);
