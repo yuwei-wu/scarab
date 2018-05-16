@@ -36,7 +36,7 @@ cd ~/Downloads
 #wget https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config/
 cd config
 ```
-Change the ip to reflect scarab id (example scarab44 will be 192.168.131.144)
+Change the ip to reflect scarab id (example scarab44 will be 192.168.131.44, replace all ips)
 ```
 sudo cp interfaces /etc/network/
 sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
