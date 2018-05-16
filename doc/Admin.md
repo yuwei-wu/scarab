@@ -33,7 +33,7 @@ https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config
 Copy network interfaces and wpa_supplicant file
 ```
 cd ~/Downloads
-wget https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config/
+#wget https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config/
 cd config
 sudo cp interfaces /etc/network/
 sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
@@ -42,6 +42,7 @@ sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
 Copy udev rules for setting USB persissions
 ```
 sudo cp 99-scarab.rules /etc/udev/rules.d
+sudo udevadm control --reload-rules && udevadm trigger
 cd ..
 rm -rf config
 ```
