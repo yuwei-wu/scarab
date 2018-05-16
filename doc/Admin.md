@@ -1,6 +1,6 @@
 # Scarab setup instructions for Ubuntu 16.04 and ROS Kinetic
 
-Install Ubunutu 16.04. Make admin user `scarab_admin`
+Install Ubunutu 16.04. Make admin user `scarab_admin` and hostname `scarab40` (use scarab id for hostname)
 
 Enable graphics support for kernels 4.13.0-41-generic and below
 ```
@@ -44,11 +44,9 @@ sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
 
 Copy udev rules for setting USB persissions
 ```
-https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/99-scarab.rules
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/99-scarab.rules
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
-cd ..
-rm -rf config
 ```
 
 Install ROS Kinetic (ros-kinetic-desktop-full)
@@ -86,7 +84,7 @@ catkin build
 
 Change the AGENT to reflect the current scarab id
 ```
-echo "export AGENT=scarab44" >> ~/.bashrc
+echo "export AGENT=scarab40" >> ~/.bashrc
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
 
