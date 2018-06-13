@@ -67,6 +67,10 @@ Scarab dependencies to install
 ```
 sudo apt-get install libarmadillo-dev libncurses5-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev libnl-nf-3-dev libcgal-dev libcgal-qt5-dev
 ```
+Install Primesense camera ROS packages
+```
+sudo apt-get install ros-kinetic-rgbd-launch ros-kinetic-openni2-camera ros-kinetic-openni2-launch
+```
 
 Install other packages
 ```
