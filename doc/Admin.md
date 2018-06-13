@@ -2,13 +2,19 @@
 
 Install Ubunutu 16.04. Make admin user `scarab_admin` and hostname `scarab40` (use scarab id for hostname)
 
+Update, Upgrade
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
+
 Enable graphics support for kernels 4.13.0-41-generic and below
 ```
 sudo update-pciids
 sudo edit /etc/default/grub
 ```
 
-Add i915.alpha_support=1 to GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" in /etc/default/grub
+Change line GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" to say GRUB_CMDLINE_LINUX_DEFAULT="quiet splash i915.alpha_support=1"  in /etc/default/grub
 ```
 sudo update-grub
 sudo reboot
