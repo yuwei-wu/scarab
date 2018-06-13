@@ -6,12 +6,16 @@
   <arg name="odom_frame_id" value="odom" />
   <arg name="global_frame_id" value="/map" />
 
+ <!-- base_link to laser transform -->
+  <node pkg="tf" type="static_transform_publisher" name="transformer"
+        args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/base_link $(arg agent)/laser 500" />
+
   <group ns="$(arg agent)">
     <node name="laser" pkg="urg_node" type="urg_node" output="screen">
       <param name="ip_address" value=""/>
       <param name="serial_port" value="/dev/hokuyo"/>
       <param name="serial_baud" value="115200"/>
-      <param name="frame_id" value="laser"/>
+      <param name="frame_id" value="$(arg agent)/laser"/>
       <param name="calibrate_time" value="true"/>
       <param name="publish_intensity" value="false"/>
       <param name="publish_multiecho" value="false"/>
@@ -23,8 +27,13 @@
       <param name="intensity" value="false" />
     </node>
 
+    <node name="laser_throttle" pkg="topic_tools" type="throttle"
+          args="messages scan 5.0" />  
+
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
       <param name="broadcast_tf" value="false" />
+      <param name="odom_frame" value="$(arg agent)/odom_motor" />
+      <param name="base_frame" value="$(arg agent)/base_link" />
       <param name="left_sign" value="1" />
       <param name="right_sign" value="-1" />
       <param name="pid_p" value="0.9" />
@@ -33,6 +42,24 @@
       <param name="pid_iclamp" value="300" />
       <param name="portname" value="/dev/roboclaw" />
     </node>
+
+    <node name="laser_odom" pkg="laser_odom" type="laser_odom"
+        output="screen" >
+    <param name="debug" value="false" />
+    <param name="base_frame" value="$(arg agent)/base_link" />
+    <param name="odom_frame" value="$(arg agent)/odom_laser" />
+    <rosparam>
+      grid_resolution: 0.05
+      sensor_sd: 0.02
+      subsample: 1
+      travel_distance: 0.2
+      travel_angle: 0.034
+      decay_duration: 200
+      decay_step: 40
+      range_x: 0.2
+      range_y: 0.2
+    </rosparam>
+  </node>
   </group>
 
 </launch>
