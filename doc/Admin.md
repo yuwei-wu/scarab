@@ -71,6 +71,10 @@ Install Primesense camera ROS packages
 ```
 sudo apt-get install ros-kinetic-rgbd-launch ros-kinetic-openni2-camera ros-kinetic-openni2-launch
 ```
+Install gmapping package
+```
+sudo apt-get install ros-kinetic-gmapping 
+```
 
 Install other packages
 ```
