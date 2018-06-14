@@ -60,7 +60,7 @@ http://wiki.ros.org/kinetic/Installation
 
 Other ROS packages
 ```
-sudo apt-get install ros-kinetic-urg-node
+sudo apt-get install ros-kinetic-urg-node 
 ```
 
 Scarab dependencies to install
@@ -74,6 +74,13 @@ sudo apt-get install ros-kinetic-rgbd-launch ros-kinetic-openni2-camera ros-kine
 Install gmapping package
 ```
 sudo apt-get install ros-kinetic-gmapping 
+```
+Set up servo motor
+```
+sudo apt-get install ros-kinetic-dynamixel-motor
+sudo usermod -a -G dialout $USER
+sudo chmod 777 /dev/ttyUSB0
+On scarab, make sure mode switch on servo controller is all the way towards the end the USB connects to.
 ```
 
 Install other packages
