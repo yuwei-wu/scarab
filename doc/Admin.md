@@ -54,6 +54,15 @@ wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
 ```
+Disable automatic updates (because they mess up the wifi)
+```
+Open the Software Updater settings
+Go to the Updates tab
+Change the drop down menus to:
+Automatically check for updates: Weekly
+When there are security updates: Display immediately
+When there are other updates: Display weekly
+```
 
 Install ROS Kinetic (ros-kinetic-desktop-full)
 http://wiki.ros.org/kinetic/Installation
