@@ -68,6 +68,7 @@ public:
     }
 
     pub_ = nh_.advertise<roboclaw::motor_state>("motor_state", 5);
+
     setVel(0.0, 0.0);
 
     //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
@@ -473,6 +474,8 @@ public:
 
     cmd_vel_sub = node_.subscribe("cmd_vel", 1,
                                   &RoboClawNode::OnTwistCmd, this);
+
+    last_vel_cmd_ = ros::Time::now();
   }
 
   // Thread safe way of setting velocity
@@ -480,14 +483,27 @@ public:
   void OnTwistCmd(const geometry_msgs::TwistConstPtr &input)  {
     ROS_DEBUG("Got cmd_vel: %2.2f %2.2f", input->linear.x, input->angular.z);
     {
+      last_vel_cmd_ = ros::Time::now();
       boost::mutex::scoped_lock lock(driver_mutex_);
       driver_->setVel(input->linear.x, input->angular.z, true);
+
     }
   }
 
   // Thread safe way of updating odometry estimate and publishing state
   // Assumes state_mutex_ is held
   void UpdateVelAndPublish() {
+
+    ros::Time now = ros::Time::now();
+    double dt = (now-last_vel_cmd_).toSec();
+
+    //Stop robot if no command is received in 0.5 sec
+    if(dt > 0.5)
+    {
+      boost::mutex::scoped_lock lock(driver_mutex_);
+      driver_->setVel(0.0,0.0);
+    }
+
     roboclaw::motor_state state;
     {
       boost::mutex::scoped_lock lock(driver_mutex_);
@@ -599,6 +615,8 @@ private:
 
   // Current x, y, theta estimate given odometry
   ros::Time last_vel_update;
+  ros::Time last_vel_cmd_;
+
   bool broadcast_tf_;
   nav_msgs::Odometry odom_state;
   double x_, y_, th_;
