@@ -18,7 +18,10 @@ SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{serial}=="A600QBPM", SYMLINK+="bb04",
 SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{serial}=="A600QBCK", SYMLINK+="bb04", MODE="0666"
 
 # Servo
-SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", SYMLINK+="servo", MODE="0666"
+#SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", SYMLINK+="servo", MODE="0666"
+
+# Servo and FIDI Controller 
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{serial}=="AS05*", ATTRS{product}=="FT232R USB UART", SYMLINK+="servo", MODE="0666"
 
 # XBee
 SUBSYSTEM=="tty", ATTRS{serial}=="A901XTAT", SYMLINK+="xbee0" MODE="0777"
