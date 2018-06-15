@@ -12,7 +12,7 @@
 
 #include <nav_msgs/OccupancyGrid.h>
 
-#include "player_map/map.h"
+#include <hfn/map.h>
 #include <Eigen/StdVector>
 namespace scarab {
 

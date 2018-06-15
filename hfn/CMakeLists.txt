@@ -4,7 +4,7 @@ project(hfn)
 set(CMAKE_CXX_FLAGS "-frounding-math ${CMAKE_CXX_FLAGS}")
 
 find_package(cmake_modules REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(CGAL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure roscpp
@@ -19,7 +19,7 @@ catkin_package(
                  nav_msgs tf angles scarab_msgs
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
   ${CGAL_INCLUDE_DIRS})
 
 add_library(playermap src/map.c src/rosmap.cpp)
@@ -31,3 +31,13 @@ target_link_libraries(hfnlib ${CGAL_LIBRARY} ${GMP_LIBRARIES})
 add_executable(hfn src/hfn_node.cpp)
 target_link_libraries(hfn ${catkin_LIBRARIES} hfnlib playermap)
 add_dependencies(hfn ${PROJECT_NAME}_gencfg)
+
+install(TARGETS
+    playermap
+    hfn
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

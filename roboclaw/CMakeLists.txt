@@ -32,3 +32,12 @@ add_dependencies(roboclaw_node roboclaw_gencfg)
 
 add_executable(roboclaw_restart src/roboclaw_restart.cpp)
 target_link_libraries(roboclaw_restart roboclaw)
+
+install(TARGETS
+    roboclaw_node
+    roboclaw
+    roboclaw_restart
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

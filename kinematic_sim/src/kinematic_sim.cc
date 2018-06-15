@@ -15,7 +15,7 @@
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_datatypes.h"
 
-#include "player_map/rosmap.hpp"
+#include <hfn/rosmap.hpp>
 
 using namespace std;
 

@@ -16,7 +16,7 @@
 
 #include <scarab_msgs/MoveAction.h>
 
-#include "player_map/rosmap.hpp"
+#include <hfn/rosmap.hpp>
 
 namespace scarab {
 

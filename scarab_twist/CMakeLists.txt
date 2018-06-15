@@ -15,3 +15,13 @@ target_link_libraries(joy_to_twist ${catkin_LIBRARIES})
 
 add_executable(key_to_twist src/key_to_twist.cpp)
 target_link_libraries(key_to_twist ${catkin_LIBRARIES} ${CURSES_LIBRARIES})
+
+install(TARGETS
+    joy_to_twist
+    key_to_twist
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

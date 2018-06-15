@@ -31,7 +31,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "player_map/map.h"
+#include <hfn/map.h>
 
 // Create a new map
 map_t *map_alloc(void) {
