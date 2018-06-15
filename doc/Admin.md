@@ -142,6 +142,7 @@ sudo cp -r install /opt/ros/scarab/
 Making account for other users
 ```
 sudo adduser scarab
+sudo usermod -a -G dialout scarab
 ```
 set password to 'mrsl'
 
