@@ -28,7 +28,7 @@
     </node>
 
     <node name="laser_throttle" pkg="topic_tools" type="throttle"
-          args="messages scan 5.0" />  
+          args="messages scan 5.0" />
 
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
       <param name="broadcast_tf" value="false" />
@@ -36,10 +36,10 @@
       <param name="base_frame" value="$(arg agent)/base_link" />
       <param name="left_sign" value="1" />
       <param name="right_sign" value="-1" />
-      <param name="pid_p" value="0.9" />
-      <param name="pid_i" value="0.0" />
+      <param name="pid_p" value="0.1" />
+      <param name="pid_i" value="2.0" />
       <param name="pid_d" value="0.0" />
-      <param name="pid_iclamp" value="300" />
+      <param name="pid_iclamp" value="55" />
       <param name="portname" value="/dev/roboclaw" />
     </node>
 

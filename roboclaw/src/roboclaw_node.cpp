@@ -27,8 +27,8 @@ public:
     // Robot kinematics
     nh_.param("axle_width", axle_width_, 0.255); // 0.28
     nh_.param("wheel_diam", wheel_diam_, 0.10); // 0.085
-    nh_.param("quad_pulse_per_motor_rev", quad_pulse_per_motor_rev_, 2000.0);
-    nh_.param("motor_to_wheel_ratio", motor_to_wheel_ratio_, 38.35); // 33.0
+    nh_.param("quad_pulse_per_motor_rev", quad_pulse_per_motor_rev_, 2000.0); //2000
+    nh_.param("motor_to_wheel_ratio", motor_to_wheel_ratio_, 38.35); // 38.35
     double motor_rev_per_meter = motor_to_wheel_ratio_ / (M_PI * wheel_diam_);
     quad_pulse_per_meter_ = quad_pulse_per_motor_rev_ * motor_rev_per_meter;
 
@@ -50,10 +50,8 @@ public:
 
     // Hardware parameters
     nh_.param("left_sign", left_sign_, -1);
-    nh_.param("right_sign", right_sign_, -1);
+    nh_.param("right_sign", right_sign_, 1);
     nh_.param("portname", portname_, std::string("/dev/roboclaw"));
-    nh_.param("address", address_, 0x80);
-
     nh_.param("address", address_, 0x80);
 
     ser_.reset(new USBSerial());
@@ -73,9 +71,11 @@ public:
     setVel(0.0, 0.0);
 
     //quadrature pulse per second (QPPS) is the maximum speed the motor and encoder can acheive
-    qpps_ = 250000;
+    qpps_ = 300000; //250000
 
     duty_per_qpps_ = 512.0 / qpps_;
+
+    max_duty_ = 32767;
 
   }
 
@@ -197,6 +197,7 @@ public:
     state_.w_sp = w;
 
     vwToWheelSpeed(v, w, &state_.left_sp, &state_.right_sp);
+
     // Convert speeds to quad pulses per second
     state_.left_qpps_sp =
       static_cast<int32_t>(round(state_.left_sp * quad_pulse_per_meter_));
@@ -254,12 +255,14 @@ public:
       return;
     }
 
+    //ROS_ERROR("read speed %i %i", state_.left_qpps, state_.right_qpps);
+
     // Convert qpps to meters / second
     state_.right = state_.right_qpps / quad_pulse_per_meter_;
     state_.left = state_.left_qpps / quad_pulse_per_meter_;
 
-    state_.v = (state_.right + state_.left) / 2.0;
-    state_.w = (state_.right - state_.left) / axle_width_;
+    state_.v = -(state_.right + state_.left) / 2.0;
+    state_.w = -(state_.right - state_.left) / axle_width_;
   }
 
   // Read actual speed of motors and update state
@@ -281,8 +284,12 @@ public:
       left_duty = pid_left_.updatePid(left_error_duty, dur);
       right_duty = pid_right_.updatePid(right_error_duty, dur);
 
+      //ROS_ERROR("err left_error_duty %f right_error_duty %f left_duty %f right_duty %f", left_error_duty, right_error_duty, left_duty, right_duty);
+
       state_.left_duty = state_.left_duty_sp - left_duty;
       state_.right_duty = state_.right_duty_sp - right_duty;
+
+      //ROS_ERROR("diff left_duty %f right_duty %f", state_.left_duty, state_.right_duty);
 
       pid_left_.getCurrentPIDErrors(&state_.left_pid_pe, &state_.left_pid_ie,
                                     &state_.left_pid_de);
@@ -316,16 +323,22 @@ public:
       state_.right_duty = prev_right + copysign(dlimit, right_diff);
     }
 
-    uint16_t m1duty = left_sign_*state_.left_duty;
-    uint16_t m2duty = right_sign_*state_.right_duty;
+    uint16_t m1duty = left_sign_*state_.left_duty*max_duty_/512.0;
+    uint16_t m2duty = right_sign_*state_.right_duty*max_duty_/512.0;
+
 
     /*
-    ROS_ERROR("** %i %i %f %f", (int16_t)m1duty, (int16_t)m2duty,
-             left_sign_*state_.left_duty, right_sign_*state_.right_duty);
+    ROS_ERROR("set speed %f %f %f %f %d %d", state_.left_sp, state_.right_sp,
+      round(state_.left_sp * quad_pulse_per_meter_), round(state_.right_sp * quad_pulse_per_meter_),
+      left_sign_*static_cast<int32_t>(round(state_.left_sp * quad_pulse_per_meter_)), right_sign_*static_cast<int32_t>(round(state_.right_sp * quad_pulse_per_meter_)));
 
-    ROS_ERROR("Setpoint QPPS %f %f",
-              left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
-    ROS_ERROR_STREAM("max acc " << accel_max_quad_);
+    ROS_ERROR("** %i %i %f %f", (int16_t)m1duty, (int16_t)m2duty, left_sign_*state_.left_duty, right_sign_*state_.right_duty);
+
+    ROS_ERROR("Setpoint QPPS %d %d", left_sign_*state_.left_qpps_sp, right_sign_*state_.right_qpps_sp);
+    //ROS_ERROR_STREAM("max acc " << accel_max_quad_);
+
+    ROS_ERROR("^^^ motor_rev_per_meter %f  quad_pulse_per_meter %f quad_pulse_per_motor_rev %f", motor_to_wheel_ratio_ / (M_PI * wheel_diam_),
+      quad_pulse_per_meter_, quad_pulse_per_motor_rev_);
 
     float Kp_fp, Ki_fp, Kd_fp;
     uint32_t qpps;
@@ -334,12 +347,14 @@ public:
 
     claw_->ReadM2VelocityPID(address_, Kp_fp, Ki_fp, Kd_fp, qpps);
     ROS_ERROR("M2 %f %f %f %d", Kp_fp, Ki_fp, Kd_fp, qpps);
+
     */
 
+
     //old method using duty cycle
-    //claw_->DutyM1M2(address_, m1duty, m2duty);
+    claw_->DutyM1M2(address_, m1duty, m2duty);
     //claw_->SpeedM1M2(address_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
-    claw_->SpeedAccelM1M2(address_, accel_max_quad_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
+    //claw_->SpeedAccelM1M2(address_, accel_max_quad_, state_.left_qpps_sp * left_sign_, state_.right_qpps_sp * right_sign_);
 
     last_cmd_time_ = ros::Time::now();
 
@@ -426,6 +441,8 @@ private:
   double duty_per_qpps_;
   double set_duty_left_, set_duty_right_;
   double d_error_;
+
+  uint32_t max_duty_;
 
   // Threshold values for resetting the PID error terms
   double pid_error_reset_v_step_threshold_;
