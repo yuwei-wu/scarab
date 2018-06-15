@@ -124,6 +124,7 @@ roslaunch scarab scarab.launch
 ```
 
 Install scarab drivers to system. catkin-tools provides profiles for devel/install space
+http://catkin-tools.readthedocs.io/en/latest/verbs/catkin_profile.html
 ```
 cd ~/ws_scarab
 catkin profile add install
