@@ -123,3 +123,32 @@ Turn on the H-BRDG and ROBO CLAW PWR switches
 roslaunch scarab scarab.launch
 ```
 
+Install scarab drivers to system. catkin-tools provides profiles for devel/install space
+```
+cd ~/ws_scarab
+catkin profile add install
+catkin profile set install
+catkin config --install
+catkin clean
+catkin build
+```
+This will create 'install' folder in the workspace. Copy it to system location.
+
+```
+sudo cp -r install /opt/ros/scarab/
+```
+
+Making account for other users
+```
+sudo adduser scarab
+```
+set password to 'mrsl'
+
+ssh to 'scarab' user
+```
+echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
+echo "source /opt/ros/scarab/setup.bash" >> ~/.bashrc
+echo "export AGENT=scarab40" >> ~/.bashrc
+```
+
+Test the launch files
