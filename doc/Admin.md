@@ -69,7 +69,7 @@ http://wiki.ros.org/kinetic/Installation
 
 Other ROS packages
 ```
-sudo apt-get install ros-kinetic-urg-node 
+sudo apt-get install ros-kinetic-urg-node ros-kinetic-joy
 ```
 
 Scarab dependencies to install
@@ -82,7 +82,7 @@ sudo apt-get install ros-kinetic-rgbd-launch ros-kinetic-openni2-camera ros-kine
 ```
 Install gmapping package
 ```
-sudo apt-get install ros-kinetic-gmapping 
+sudo apt-get install ros-kinetic-gmapping
 ```
 Set up servo motor
 ```

@@ -498,7 +498,7 @@ public:
     double dt = (now-last_vel_cmd_).toSec();
 
     //Stop robot if no command is received in 0.5 sec
-    if(dt > 0.5)
+    if(dt > 2.5)
     {
       boost::mutex::scoped_lock lock(driver_mutex_);
       driver_->setVel(0.0,0.0);
