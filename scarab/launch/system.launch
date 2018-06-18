@@ -2,15 +2,14 @@
 
   <arg name="agent" default="$(env AGENT)" />
 
-  <arg name="base_frame_id" value="base" />
-  <arg name="odom_frame_id" value="odom" />
-  <arg name="global_frame_id" value="/map" />
-
- <!-- base_link to laser transform -->
-  <node pkg="tf" type="static_transform_publisher" name="transformer"
-        args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/base_link $(arg agent)/laser 500" />
+  <arg name="base_frame" default="base_link" />
 
   <group ns="$(arg agent)">
+
+    <!-- base_link to laser transform -->
+    <node pkg="tf" type="static_transform_publisher" name="transformer"
+        args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/$(arg base_frame) $(arg agent)/laser 100" />
+
     <node name="laser" pkg="urg_node" type="urg_node" output="screen">
       <param name="ip_address" value=""/>
       <param name="serial_port" value="/dev/hokuyo"/>
@@ -33,7 +32,7 @@
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
       <param name="broadcast_tf" value="false" />
       <param name="odom_frame" value="$(arg agent)/odom_motor" />
-      <param name="base_frame" value="$(arg agent)/base_link" />
+      <param name="base_frame" value="$(arg agent)/$(arg base_frame)" />
       <param name="left_sign" value="1" />
       <param name="right_sign" value="-1" />
       <param name="pid_p" value="0.1" />
@@ -46,7 +45,7 @@
     <node name="laser_odom" pkg="laser_odom" type="laser_odom"
         output="screen" >
     <param name="debug" value="false" />
-    <param name="base_frame" value="$(arg agent)/base_link" />
+    <param name="base_frame" value="$(arg agent)/$(arg base_frame)" />
     <param name="odom_frame" value="$(arg agent)/odom_laser" />
     <rosparam>
       grid_resolution: 0.05
