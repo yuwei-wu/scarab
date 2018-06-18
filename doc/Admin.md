@@ -153,4 +153,13 @@ echo "source /opt/ros/scarab/setup.bash" >> ~/.bashrc
 echo "export AGENT=scarab40" >> ~/.bashrc
 ```
 
+Set ROS_MASTER_URI in .bashrc: The following bash commands sets the ROS_MASTER_URI to the IP of the ssh_client. Users don't have to explicitely set this. 
+
+```
+echo "export MASTER_IP="${SSH_CLIENT%% *}"
+if [[ !  -z  $MASTER_IP  ]];then
+   export ROS_MASTER_URI=http://${MASTER_IP}:11311
+fi " >> ~/.bashrc
+```
+
 Test the launch files
