@@ -14,6 +14,16 @@
     <node pkg="tf" type="static_transform_publisher" name="transformer"
         args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/$(arg base_frame) $(arg agent)/laser 100" />
 
+    <!-- base_link to camera_link transform -->
+    <node name="camera_tf_broadcaster" pkg="scarab" type="camera_tf_broadcaster.py" respawn="false" output="screen">
+      <param name="agent" type="string" value="$(arg agent)" />
+    </node>
+
+    <!-- camera node -->
+    <include file="$(find openni2_launch)/launch/openni2_tf_prefix.launch">
+      <arg name="tf_prefix" value="$(arg agent)"/>
+    </include>
+
     <node name="laser" pkg="urg_node" type="urg_node" output="screen">
       <param name="ip_address" value=""/>
       <param name="serial_port" value="/dev/hokuyo"/>
