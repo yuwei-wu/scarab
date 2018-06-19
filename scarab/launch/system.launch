@@ -4,6 +4,10 @@
 
   <arg name="base_frame" default="base_link" />
 
+  <include file="$(find scarab)/launch/servo.launch">
+        <arg name="agent" value="$(arg agent)" />
+  </include>
+
   <group ns="$(arg agent)">
 
     <!-- base_link to laser transform -->
