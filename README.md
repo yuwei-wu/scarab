@@ -7,6 +7,8 @@ ROS packages for MRSL scarab ground robots
 
 [README for admins](doc/Admin.md)
 
+[TODOS & Issues](doc/CurrentIssues.md)
+
 
 Running Scarabs with Vicon
 Clone motion capture package
