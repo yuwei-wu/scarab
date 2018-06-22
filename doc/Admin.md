@@ -115,6 +115,7 @@ catkin build
 Change the AGENT to reflect the current scarab id
 ```
 echo "export AGENT=scarab40" >> ~/.bashrc
+echo "export ROS_HOSTNAME=$AGENT" >> ~/.bashrc
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
 
