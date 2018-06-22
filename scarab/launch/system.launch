@@ -56,23 +56,6 @@
       <param name="portname" value="/dev/roboclaw" />
     </node>
 
-    <node name="laser_odom" pkg="laser_odom" type="laser_odom"
-        output="screen" >
-    <param name="debug" value="false" />
-    <param name="base_frame" value="$(arg agent)/$(arg base_frame)" />
-    <param name="odom_frame" value="$(arg agent)/odom_laser" />
-    <rosparam>
-      grid_resolution: 0.05
-      sensor_sd: 0.02
-      subsample: 1
-      travel_distance: 0.2
-      travel_angle: 0.034
-      decay_duration: 200
-      decay_step: 40
-      range_x: 0.2
-      range_y: 0.2
-    </rosparam>
-  </node>
   </group>
 
 </launch>

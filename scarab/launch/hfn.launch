@@ -2,14 +2,15 @@
   <arg name="agent" default="$(env AGENT)" />
 
   <arg name="use_vicon" default="false"/>
-  <arg name="odom_topic"  default="odom" if="$(arg use_vicon)"/>
+  <arg name="odom_topic"  default="odom_vicon" if="$(arg use_vicon)"/>
   <arg name="odom_topic"  default="odom_laser" unless="$(arg use_vicon)"/>
+  <arg name="map_topic"   default="map" if="$(arg use_vicon)"/>
+  <arg name="map_topic"   default="map_hokuyo" unless="$(arg use_vicon)"/>
 
   <arg name="cmd_vel_topic"   default="cmd_vel"/>
   <arg name="scan_topic"  default="scan"/>
   <arg name="pose_topic"  default="pose"/>
   <arg name="goal_topic" default="move_base_simple/goal"/>
-  <arg name="map_topic"   default="map_hokuyo"/>
 
   <arg name="map_frame" default="map_hokuyo" />
   <arg name="base_frame" default="base_link" />
@@ -21,12 +22,45 @@
     <group if="$(arg use_vicon)">
       <node pkg="map_server" name="map" type="map_server" output="screen"
         args="$(find scarab)/maps/empty_map.yaml" >
-        <param name="frame_id" value="$(arg map_frame)" />
-        <remap from="map" to="$(arg map_topic)" />
+        <param name="frame_id" value="$(arg agent)/$(arg map_frame)" />
+        <remap from="map" to="$(arg agent)/$(arg map_topic)" />
       </node>
 
       <node name="dummy_slam" pkg="tf" type="static_transform_publisher"
-        args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg map_frame) /$(arg agent)/$(arg odom_frame) 100" />
+        args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/$(arg map_frame) /$(arg agent)/$(arg odom_frame) 100" />
+
+      <node name="odom_to_tf" pkg="scarab" type="odom_to_tf.py" output="screen">
+        <param name="base_frame_id" value="$(arg agent)/$(arg base_frame)"/>
+        <param name="odom_frame_id" value="$(arg agent)/$(arg odom_frame)"/>
+        <remap from="odom" to="$(arg odom_topic)" />
+      </node>
+
+      <!--
+      <node name="pose_stamped" pkg="hfn" type="tf_posestamped_node.py" >
+        <param name="base_frame_id" value="/$(arg agent)/$(arg base_frame)" />
+        <param name="map_frame_id" value="/$(arg agent)/$(arg map_frame)" />
+      </node> -->
+
+    </group>
+
+    <group unless="$(arg use_vicon)">
+      <node name="laser_odom" pkg="laser_odom" type="laser_odom"
+          output="screen">
+        <param name="debug" value="false" />
+        <param name="base_frame" value="$(arg agent)/$(arg base_frame)" />
+        <param name="odom_frame" value="$(arg agent)/odom_laser" />
+        <rosparam>
+          grid_resolution: 0.05
+          sensor_sd: 0.02
+          subsample: 1
+          travel_distance: 0.2
+          travel_angle: 0.034
+          decay_duration: 200
+          decay_step: 40
+          range_x: 0.2
+          range_y: 0.2
+        </rosparam>
+      </node>
     </group>
 
     <node name="pose" pkg="hfn" type="tf_posestamped_node.py" output="screen">
@@ -62,6 +96,6 @@
 
     <node name="goal_to_action" pkg="hfn" type="goal_to_action.py" output="screen">
       <remap from="goal" to="$(arg goal_topic)" />
-     </node>
+    </node>
   </group>
 </launch>

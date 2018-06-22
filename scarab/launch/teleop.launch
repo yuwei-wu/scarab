@@ -1,0 +1,9 @@
+<launch>
+
+  <arg name="agent" default="$(env AGENT)" />
+
+  <include file="$(find scarab)/launch/system.launch"/>
+
+  <include file="$(find scarab_twist)/launch/joystick.launch"/>
+
+</launch>
