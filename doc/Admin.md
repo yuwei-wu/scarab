@@ -151,7 +151,7 @@ ssh to 'scarab' user
 echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 echo "source /opt/ros/scarab/setup.bash" >> ~/.bashrc
 echo "export AGENT=scarab40" >> ~/.bashrc
-export ROS_IP=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p') >> ~/.bashrc
+echo "export ROS_IP=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')" >> ~/.bashrc
 ```
 
 Set ROS_MASTER_URI in .bashrc: The following bash commands sets the ROS_MASTER_URI to the IP of the ssh_client. Users don't have to explicitely set this.
