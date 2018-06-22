@@ -6,3 +6,13 @@ scarab
 ROS packages for MRSL scarab ground robots
 
 [README for admins](doc/Admin.md)
+
+
+Running Scarabs with Vicon
+Clone motion capture package
+
+```
+cd ~/ws_scarab/src
+git clone https://github.com/KumarRobotics/motion_capture_system.git
+
+roslaunch scarab vicon.launch
