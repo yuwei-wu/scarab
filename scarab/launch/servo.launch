@@ -25,7 +25,7 @@
             servo_tilt_controller"
       output="screen"/>
 
-    <node pkg="rostopic" type="rostopic" name="servo_pos_init" args="pub -1 /$(env AGENT)/servo_tilt_controller/command std_msgs/Float64 -- .78" output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="servo_pos_init" args="pub -1 /$(env AGENT)/servo_tilt_controller/command std_msgs/Float64 -- 0.0" output="screen"/>
 
   </group>
 </launch>
