@@ -1,13 +1,76 @@
 <launch>
 
-  <arg name="agent" value="$(env AGENT)" />
+  <arg name="agent"       default="$(env AGENT)" />
+  <arg name="camera"      default="true" />
+  <arg name="hokuyo"      default="true" />
+  <arg name="base_frame"  default="base_link" />
 
-  <arg name="diagnostics" value="true" />
-  <arg name="diag_rate" default="0.4" />
+  <group ns="$(arg agent)">
 
-  <!-- Launch UTM30 Laser, motors (roboclaw), battery monitor, diagnostics-->
-  <include file="$(find scarab)/launch/system.launch">
-    <arg name="agent" value="$(arg agent)" />
-  </include>
+    <!-- motor controller -->
+    <node pkg="roboclaw" type="roboclaw_node" name="motor">
+      <param name="broadcast_tf"  value="false" />
+      <param name="odom_frame"    value="$(arg agent)/odom_motor" />
+      <param name="base_frame"    value="$(arg agent)/$(arg base_frame)" />
+      <param name="left_sign"     value="1" />
+      <param name="right_sign"    value="-1" />
+      <param name="pid_p"         value="0.1" />
+      <param name="pid_i"         value="2.0" />
+      <param name="pid_d"         value="0.0" />
+      <param name="pid_iclamp"    value="55" />
+      <param name="portname"      value="/dev/roboclaw" />
+    </node>
+
+    <!-- camera components -->
+    <group if="$(arg camera)">
+
+      <!-- xtion tilt servo -->
+      <include file="$(find scarab)/launch/servo.launch">
+        <arg name="agent" value="$(arg agent)" />
+      </include>
+
+      <!-- camera node -->
+      <include file="$(find openni2_launch)/launch/openni2_tf_prefix.launch">
+        <arg name="tf_prefix" value="$(arg agent)"/>
+      </include>
+
+      <!-- static transform for xtion: base_link -> camera_link -->
+      <node name="camera_tf_broadcaster" pkg="scarab"
+            type="camera_tf_broadcaster.py" respawn="false" output="screen">
+        <param name="agent" type="string" value="$(arg agent)" />
+      </node>
+
+    </group>
+
+    <!-- hokuyo laser components -->
+    <group if="$(arg hokuyo)">
+
+      <!-- static transform for hokuyo: base_link -> laser -->
+      <node pkg="tf" type="static_transform_publisher" name="transformer"
+            args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/$(arg base_frame) $(arg agent)/laser 100" />
+
+      <!-- hokuyo node -->
+      <node name="laser" pkg="urg_node" type="urg_node" output="screen">
+        <param name="ip_address"          value=""/>
+        <param name="serial_port"         value="/dev/hokuyo"/>
+        <param name="serial_baud"         value="115200"/>
+        <param name="frame_id"            value="$(arg agent)/laser"/>
+        <param name="calibrate_time"      value="true"/>
+        <param name="publish_intensity"   value="false"/>
+        <param name="publish_multiecho"   value="false"/>
+        <param name="angle_min"           value="-2.1"/>
+        <param name="angle_max"           value="2.1"/>
+        <param name="cluster"             value="1" />
+        <param name="skip"                value="1" />
+        <param name="intensity"           value="false" />
+        <remap from="/diagnostics"        to="laser_diagnostics" />
+      </node>
+
+      <node name="laser_throttle" pkg="topic_tools" type="throttle"
+            args="messages scan 5.0" />
+
+    </group>
+
+  </group>
 
 </launch>
