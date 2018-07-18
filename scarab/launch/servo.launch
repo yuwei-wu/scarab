@@ -1,7 +1,5 @@
 <launch>
 
-  <arg name="agent" default="$(env AGENT)" />
-
   <rosparam file="$(find scarab)/config/servo_tilt.yaml" command="load"/>
 
   <node name="dynamixel_manager" pkg="dynamixel_controllers" type="controller_manager.py"
