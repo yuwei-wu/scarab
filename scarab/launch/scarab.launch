@@ -28,8 +28,9 @@
       <include file="$(find scarab)/launch/servo.launch"/>
 
       <!-- camera node -->
-      <include file="$(find openni2_launch)/launch/openni2_tf_prefix.launch">
+      <include file="$(find scarab)/launch/openni2_tf_prefix.launch">
         <arg name="tf_prefix" value="$(arg agent)"/>
+	<arg name="id_manufacturer" value="1d27" />
       </include>
 
       <!-- static transform for xtion: base_link -> camera_link -->
