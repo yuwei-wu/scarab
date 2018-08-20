@@ -1,4 +1,5 @@
 <launch>
+
   <arg name="agent" default="$(env AGENT)" />
 
   <arg name="scan_topic"  default="scan"/>
@@ -7,15 +8,17 @@
   <arg name="base_frame"  default="base_link"/>
   <arg name="map_frame"   default="map_hokuyo"/>
 
-  <!-- <remap from="/tf" to="tf" /> -->
-    <group ns="$(arg agent)">
-       <node pkg="gmapping" type="slam_gmapping" name="mapping"
-           output="screen" >
-       <remap from="scan" to="$(arg scan_topic)" />
-       <remap from="map" to ="$(arg map_topic)" />
-       <param name="odom_frame" value="$(arg agent)/odom_laser" />
-       <param name="base_frame" value="$(arg agent)/base_link" />
-       <param name="map_frame" value="$(arg agent)/$(arg map_topic)" />
-     </node>
-   </group>
+  <group ns="$(arg agent)">
+
+    <node pkg="gmapping" type="slam_gmapping" name="mapping"
+          output="screen" >
+      <remap from="scan" to="$(arg scan_topic)" />
+      <remap from="map" to ="$(arg map_topic)" />
+      <param name="odom_frame" value="$(arg agent)/odom_laser" />
+      <param name="base_frame" value="$(arg agent)/base_link" />
+      <param name="map_frame" value="$(arg agent)/$(arg map_topic)" />
+    </node>
+
+  </group>
+
 </launch>
