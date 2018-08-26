@@ -15,9 +15,9 @@
       <param name="left_sign"     value="-1" />
       <param name="right_sign"    value="1" />
       <param name="pid_p"         value="0.0" />
-      <param name="pid_i"         value="0.5" />
+      <param name="pid_i"         value="0.3" />
       <param name="pid_d"         value="10.0" />
-      <param name="pid_iclamp"    value="1000.0" />
+      <param name="pid_iclamp"    value="9000.0" />
       <param name="portname"      value="/dev/roboclaw" />
       <param name="qpps"          value="215000"/>
       <param name="ff_lin_m"      value="28454"/>
