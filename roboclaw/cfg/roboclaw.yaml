@@ -1,0 +1,13 @@
+broadcast_tf:  false
+left_sign:     -1
+right_sign:    1
+pid_p:         0.04
+pid_i:         0.3
+pid_d:         10.0
+pid_iclamp:    9000.0
+portname:      /dev/roboclaw
+qpps:          215000
+ff_lin_m:      28454
+ff_lin_int:    1840
+ff_ang_m:      3480
+ff_ang_int:    3600

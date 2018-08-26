@@ -5,25 +5,16 @@
   <arg name="hokuyo"      default="true" />
   <arg name="base_frame"  default="base_link" />
 
+  <arg name="roboclaw_config_file" default="$(find roboclaw)/cfg/roboclaw.yaml" />
+
   <group ns="$(arg agent)">
 
     <!-- motor controller -->
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
-      <param name="broadcast_tf"  value="false" />
       <param name="odom_frame"    value="$(arg agent)/odom_motor" />
       <param name="base_frame"    value="$(arg agent)/$(arg base_frame)" />
-      <param name="left_sign"     value="-1" />
-      <param name="right_sign"    value="1" />
-      <param name="pid_p"         value="0.0" />
-      <param name="pid_i"         value="0.3" />
-      <param name="pid_d"         value="10.0" />
-      <param name="pid_iclamp"    value="9000.0" />
-      <param name="portname"      value="/dev/roboclaw" />
-      <param name="qpps"          value="215000"/>
-      <param name="ff_lin_m"      value="28454"/>
-      <param name="ff_lin_int"    value="1840"/>
-      <param name="ff_ang_m"      value="3480"/>
-      <param name="ff_ang_int"    value="3600"/>
+
+      <rosparam command="load" file="$(arg roboclaw_config_file)" />
     </node>
 
     <!-- camera components -->
