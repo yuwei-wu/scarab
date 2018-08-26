@@ -1,0 +1,12 @@
+tau_1:               1.0
+tau_2:               0.2
+cost_occ_prob:       0.01
+cost_occ_dist:       0.15
+max_occ_dist:        0.5
+lethal_occ_dist:     0.35
+v_opt:               0.16
+w_max:               1.0
+goal_tolerance_ang:  0.2
+min_map_update:      2.0
+stuck_start:         3.0
+stop_on_preempt:     true
