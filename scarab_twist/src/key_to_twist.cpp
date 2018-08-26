@@ -12,10 +12,10 @@ int main(int argc, char** argv)
   ros::Publisher cmd_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 10);
 
   double v_speed, v_inc, w_speed, w_inc;
-  pnh.param("vspeed", v_speed, 0.6);
-  pnh.param("wspeed", w_speed, 0.6);
-  pnh.param("vinc", v_inc, 0.08);
-  pnh.param("winc", w_inc, 0.05);
+  pnh.param("vmax", v_speed, 0.8);
+  pnh.param("wmax", w_speed, 1.0);
+  pnh.param("vinc", v_inc, 0.1);
+  pnh.param("winc", w_inc, 0.2);
 
   initscr();
   clear();
