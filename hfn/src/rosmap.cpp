@@ -75,7 +75,8 @@ map_t * requestCSpaceMap(const char *srv_name, const int free_threshold,
 
 OccupancyMap::OccupancyMap()
   : map_(NULL), ncells_(0), max_free_threshold_(0),
-    min_occupied_threshold_(100), max_occ_dist_(0.0), lethal_occ_dist_(0.0) {
+    min_occupied_threshold_(100), max_occ_dist_(0.0), lethal_occ_dist_(0.0),
+    map_frame_id("map") {
 
 }
 
@@ -214,6 +215,7 @@ nav_msgs::OccupancyGrid OccupancyMap::getCSpace() {
 
 nav_msgs::OccupancyGrid OccupancyMap::getCostMap() {
   nav_msgs::OccupancyGrid grid;
+  grid.header.frame_id = map_frame_id;
   grid.info.width = map_->size_x;
   grid.info.height = map_->size_y;
   grid.info.resolution = map_->scale;

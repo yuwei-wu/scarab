@@ -384,6 +384,7 @@ HFNWrapper::HFNWrapper(const Params &params, HumanFriendlyNav *hfn) :
   odom_sub_ = nh_.subscribe("odom", 1, &HFNWrapper::onOdom, this);
 
   map_->setThresholds(params_.free_threshold, params_.occupied_threshold);
+  map_->setMapFrameID(params_.map_frame);
 
   pubWaypoints();
 }
