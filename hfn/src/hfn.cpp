@@ -838,7 +838,7 @@ void MoveServer::goalCallback() {
       ROS_WARN("HFN was sent empty set of poses");
       wrapper_->stop();
       scarab_msgs::MoveResult result;
-      result.final_status = scarab_msgs::MoveResult::UNREACHABLE; 
+      result.final_status = scarab_msgs::MoveResult::UNREACHABLE;
       as_.setAborted(result);
     } else {
       ROS_INFO("%s got request to (%.2f, %.2f, %.2f)",
