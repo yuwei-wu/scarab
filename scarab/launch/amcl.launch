@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="agent"            default="$(env AGENT)" />
+  <arg name="init"             default="false" />
+  <arg name="static_map_topic" default="static_map" />
+
+  <arg name="initial_pose_x"   default="0.0" />
+  <arg name="initial_pose_y"   default="0.0" />
+  <arg name="initial_pose_a"   default="0.0" />
+  <arg name="initial_cov_xx"   default="0.3" />
+  <arg name="initial_cov_yy"   default="0.3" />
+  <arg name="initial_cov_aa"   default="0.25" />
+
+  <group ns="$(arg agent)" >
+
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+      <remap from="static_map"      to="$(arg static_map_topic)" />
+
+      <param name="global_frame_id" value="map" />
+      <param name="base_frame_id"   value="$(arg agent)/base_link" />
+      <param name="odom_frame_id"   value="$(arg agent)/odom_laser" />
+      <param name="initial_pose_x"  value="$(arg initial_pose_x)" if="$(arg init)" />
+      <param name="initial_pose_y"  value="$(arg initial_pose_y)" if="$(arg init)" />
+      <param name="initial_pose_a"  value="$(arg initial_pose_a)" if="$(arg init)" />
+      <param name="initial_cov_xx"  value="$(arg initial_cov_xx)" if="$(arg init)" />
+      <param name="initial_cov_yy"  value="$(arg initial_cov_yy)" if="$(arg init)" />
+      <param name="initial_cov_aa"  value="$(arg initial_cov_aa)" if="$(arg init)" />
+    </node>
+
+  </group>
+
+</launch>
