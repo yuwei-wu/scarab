@@ -1,11 +1,13 @@
 <launch>
 
   <arg name="agent"       default="$(env AGENT)" />
+  <arg name="laser_odom"  default="false" />
   <arg name="camera"      default="true" />
   <arg name="hokuyo"      default="true" />
   <arg name="base_frame"  default="base_link" />
 
   <arg name="roboclaw_config_file" default="$(find roboclaw)/cfg/roboclaw.yaml" />
+
 
   <group ns="$(arg agent)">
 
@@ -16,6 +18,7 @@
 
       <rosparam command="load" file="$(arg roboclaw_config_file)" />
     </node>
+
 
     <!-- camera components -->
     <group if="$(arg camera)">
@@ -36,6 +39,7 @@
       </node>
 
     </group>
+
 
     <!-- hokuyo laser components -->
     <group if="$(arg hokuyo)">
@@ -65,6 +69,26 @@
             args="messages scan 5.0" />
 
     </group>
+
+
+    <!-- laser odometry -->
+    <node name="laser_odom" pkg="laser_odom" type="laser_odom"
+          output="screen" if="$(arg laser_odom)">
+      <param name="debug" value="false" />
+      <param name="base_frame" value="$(arg agent)/base_link" />
+      <param name="odom_frame" value="$(arg agent)/odom_laser" />
+      <rosparam>
+        grid_resolution: 0.05
+        sensor_sd: 0.02
+        subsample: 1
+        travel_distance: 0.2
+        travel_angle: 0.034
+        decay_duration: 200
+        decay_step: 40
+        range_x: 0.2
+        range_y: 0.2
+      </rosparam>
+    </node>
 
   </group>
 

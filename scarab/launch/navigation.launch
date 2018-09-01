@@ -44,6 +44,7 @@
 
   </group>
 
+
   <!-- launch components for navigation with gmapping -->
   <group unless="$(arg use_vicon)">
 
@@ -54,24 +55,6 @@
       <arg name="base_frame"  value="$(arg base_frame)"/>
       <arg name="map_frame"   value="$(arg map_frame)"/>
     </include>
-
-    <node name="laser_odom" pkg="laser_odom" type="laser_odom"
-          output="screen" ns="$(arg agent)">
-      <param name="debug" value="false" />
-      <param name="base_frame" value="$(arg agent)/$(arg base_frame)" />
-      <param name="odom_frame" value="$(arg agent)/odom_laser" />
-      <rosparam>
-        grid_resolution: 0.05
-        sensor_sd: 0.02
-        subsample: 1
-        travel_distance: 0.2
-        travel_angle: 0.034
-        decay_duration: 200
-        decay_step: 40
-        range_x: 0.2
-        range_y: 0.2
-      </rosparam>
-    </node>
 
   </group>
 
@@ -105,10 +88,13 @@
 
   </group>
 
-  <!-- start the robot -->
+
+  <!-- robot components -->
   <include file="$(find scarab)/launch/scarab.launch">
-    <arg name="agent" value="$(arg agent)"/>
-    <arg name="camera" value="false"/>
+    <arg name="agent"      value="$(arg agent)"/>
+    <arg name="camera"     value="false"/>
+    <arg name="hokuyo"     value="true"/>
+    <arg name="laser_odom" value="true"/>
   </include>
 
 </launch>
