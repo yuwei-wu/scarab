@@ -5,6 +5,7 @@
   <arg name="agent"  default="$(env AGENT)" />
   <arg name="camera" default="false" /> <!-- don't need the asus for gmapping -->
 
+  <!-- scarab components -->
   <include file="$(find scarab)/launch/scarab.launch">
     <arg name="agent"      value="$(arg agent)" />
     <arg name="camera"     value="$(arg camera)" />
@@ -12,8 +13,20 @@
     <arg name="laser_odom" value="true" />
   </include>
 
+  <!-- gmapping -->
   <include file="$(find scarab)/launch/gmapping.launch">
     <arg name="agent" value="$(arg agent)" />
   </include>
+
+  <!-- publish robot pose from tf tree -->
+  <node name="pose_pub"
+        pkg="hfn"
+        type="tf_posestamped_node.py"
+        output="screen"
+        ns="$(arg agent)">
+    <param name="base_frame_id" value="$(arg agent)/base_link"/>
+    <param name="map_frame_id" value="$(arg agent)/map_hokuyo"/>
+    <remap from="pose" to="pose" />
+  </node>
 
 </launch>
