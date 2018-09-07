@@ -2,7 +2,7 @@
 
   <arg name="agent"            default="$(env AGENT)" />
   <arg name="init"             default="false" />
-  <arg name="static_map_topic" default="static_map" />
+  <arg name="map_service"      default="static_map" />
   <arg name="map_frame"        default="map" />
 
   <arg name="initial_pose_x"   default="0.0" />
@@ -15,7 +15,7 @@
   <group ns="$(arg agent)" >
 
     <node pkg="amcl" type="amcl" name="amcl" output="screen">
-      <remap from="static_map"      to="$(arg static_map_topic)" />
+      <remap from="static_map"      to="$(arg map_service)" />
 
       <param name="global_frame_id" value="$(arg map_frame)" />
       <param name="base_frame_id"   value="$(arg agent)/base_link" />

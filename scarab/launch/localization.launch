@@ -5,7 +5,7 @@
   <arg name="map_file"         default="$(find scarab)/maps/perch.yaml" />
   <arg name="map_server"       default="true" /> <!-- start map server? -->
   <arg name="camera"           default="false" /> <!-- don't need the asus for amcl -->
-  <arg name="static_map_topic" default="static_map" />
+  <arg name="map_service"      default="static_map" />
   <arg name="map_frame"        default="$(arg agent)/map" />
 
   <arg name="initial_pose_x"   default="0.0" />
@@ -30,7 +30,7 @@
   <include file="$(find scarab)/launch/amcl.launch">
     <arg name="agent"            value="$(arg agent)" />
     <arg name="init"             value="$(arg init)" />
-    <arg name="static_map_topic" value="$(arg static_map_topic)" />
+    <arg name="map_service"      value="$(arg map_service)" />
     <arg name="map_frame"        value="$(arg map_frame)" />
     <arg name="initial_pose_x"   value="$(arg initial_pose_x)" />
     <arg name="initial_pose_y"   value="$(arg initial_pose_y)" />
