@@ -15,7 +15,7 @@ include_directories(${Boost_INCLUDE_DIR} ${EIGEN_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 add_library(matcher src/matcher.cpp)
-target_link_libraries(matcher ${PCL_LIBRARIES})
+target_link_libraries(matcher ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(laser_odom_bag src/laser_odom_bag.cpp)
 target_link_libraries(laser_odom_bag matcher ${catkin_LIBRARIES})
