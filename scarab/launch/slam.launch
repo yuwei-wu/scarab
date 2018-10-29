@@ -2,11 +2,13 @@
 
   <!-- standalone launch file for running gmapping -->
 
-  <arg name="agent" default="$(env AGENT)" />
+  <arg name="agent" default="$(optenv AGENT defaultagent)" />
 
+  <!--
   <include file="$(find scarab)/launch/scarab.launch">
     <arg name="agent" value="$(arg agent)" />
   </include>
+  -->
 
   <include file="$(find scarab)/launch/gmapping.launch">
     <arg name="agent" value="$(arg agent)" />

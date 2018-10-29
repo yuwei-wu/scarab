@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="agent" default="$(env AGENT)" />
+  <arg name="agent" default="$(optenv AGENT defaultagent)" />
 
   <arg name="scan_topic"  default="scan"/>
   <arg name="map_topic"   default="map_hokuyo"/>

@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="agent"         default="$(env AGENT)" />
+  <arg name="agent"         default="$(optenv AGENT defaultagent)" />
 
   <arg name="use_vicon"     default="false"/>
   <arg name="odom_topic"    default="odom_vicon" if="$(arg use_vicon)"/>
