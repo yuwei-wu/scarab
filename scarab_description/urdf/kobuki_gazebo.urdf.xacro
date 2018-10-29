@@ -49,13 +49,14 @@
         <!-- BWC: This is intentionally flipped; not sure why necessary -->
         <leftJoint>wheel_right_joint</leftJoint>
         <rightJoint>wheel_left_joint</rightJoint>
+        <legacyMode>true</legacyMode>
         <wheelSeparation>0.230</wheelSeparation>
         <wheelDiameter>0.070</wheelDiameter>
         <torque>1.0</torque>
         <commandTopic>cmd_vel</commandTopic>
-        <odometryTopic>ground_truth/odom</odometryTopic>
-        <odometryFrame>ground_truth/odom</odometryFrame>
-        <robotBaseFrame>ground_truth/base_link</robotBaseFrame>
+        <odometryTopic>odom</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <robotBaseFrame>base_footprint</robotBaseFrame>
 
         <publishWheelJointState>false</publishWheelJointState>
         <wheelAcceleration>0</wheelAcceleration>
@@ -63,6 +64,19 @@
         <odometrySource>world</odometrySource>
         <publishTf>1</publishTf>
         <publishWheelTF>false</publishWheelTF>
+      </plugin>
+    </gazebo>
+
+    <gazebo>
+      <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>50.0</updateRate>
+        <bodyName>base_link</bodyName>
+        <topicName>ground_truth/state</topicName>
+        <gaussianNoise>0.01</gaussianNoise>
+        <frameName>world</frameName>
+        <xyzOffsets>0 0 0</xyzOffsets>
+        <rpyOffsets>0 0 0</rpyOffsets>
       </plugin>
     </gazebo>
   </xacro:macro>

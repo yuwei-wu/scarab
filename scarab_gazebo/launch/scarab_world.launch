@@ -4,7 +4,7 @@
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
-  <arg name="ns" default="scarab40" />
+  <arg name="agent" default="scarab" />
 
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
@@ -23,8 +23,8 @@
   <node name="levine_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
         args="-sdf -model levine -file $(find scarab_gazebo)/models/levine/model.sdf"/>
 
-  <group ns="$(arg ns)">
-    <param name="tf_prefix" value="" />
+  <group ns="$(arg agent)">
+    <param name="tf_prefix" value="$(arg agent)" />
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
           output="screen"
           args="-urdf -model scarab -param /robot_description -x 0 -y 0"/>
