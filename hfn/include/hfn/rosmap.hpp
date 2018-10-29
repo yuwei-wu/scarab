@@ -55,6 +55,11 @@ public:
     }
   }
 
+  void setMapFrameID(const std::string id)
+  {
+    map_frame_id = id;
+  }
+
   int numX() { return map_->size_x; }
   int numY() { return map_->size_y; }
   const map_cell_t* at(int xi, int yi) const {
@@ -125,6 +130,7 @@ private:
   // Priority queue mapping cost to index
   boost::scoped_ptr<std::set<Node, NodeCompare> > Q_;
   Path endpoints_;
+  std::string map_frame_id;
 };
 
 } // end namespace scarab

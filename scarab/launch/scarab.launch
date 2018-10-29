@@ -1,25 +1,24 @@
 <launch>
 
   <arg name="agent"       default="$(env AGENT)" />
+  <arg name="laser_odom"  default="false" />
   <arg name="camera"      default="true" />
   <arg name="hokuyo"      default="true" />
   <arg name="base_frame"  default="base_link" />
+
+  <arg name="roboclaw_config_file" default="$(find roboclaw)/cfg/roboclaw.yaml" />
+
 
   <group ns="$(arg agent)">
 
     <!-- motor controller -->
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
-      <param name="broadcast_tf"  value="false" />
       <param name="odom_frame"    value="$(arg agent)/odom_motor" />
       <param name="base_frame"    value="$(arg agent)/$(arg base_frame)" />
-      <param name="left_sign"     value="1" />
-      <param name="right_sign"    value="-1" />
-      <param name="pid_p"         value="0.1" />
-      <param name="pid_i"         value="2.0" />
-      <param name="pid_d"         value="0.0" />
-      <param name="pid_iclamp"    value="55" />
-      <param name="portname"      value="/dev/roboclaw" />
+
+      <rosparam command="load" file="$(arg roboclaw_config_file)" />
     </node>
+
 
     <!-- camera components -->
     <group if="$(arg camera)">
@@ -30,7 +29,7 @@
       <!-- camera node -->
       <include file="$(find scarab)/launch/openni2_tf_prefix.launch">
         <arg name="tf_prefix" value="$(arg agent)"/>
-	<arg name="id_manufacturer" value="1d27" />
+	      <arg name="id_manufacturer" value="1d27" />
       </include>
 
       <!-- static transform for xtion: base_link -> camera_link -->
@@ -40,6 +39,7 @@
       </node>
 
     </group>
+
 
     <!-- hokuyo laser components -->
     <group if="$(arg hokuyo)">
@@ -69,6 +69,26 @@
             args="messages scan 5.0" />
 
     </group>
+
+
+    <!-- laser odometry -->
+    <node name="laser_odom" pkg="laser_odom" type="laser_odom"
+          output="screen" if="$(arg laser_odom)">
+      <param name="debug" value="false" />
+      <param name="base_frame" value="$(arg agent)/base_link" />
+      <param name="odom_frame" value="$(arg agent)/odom_laser" />
+      <rosparam>
+        grid_resolution: 0.05
+        sensor_sd: 0.02
+        subsample: 1
+        travel_distance: 0.2
+        travel_angle: 0.034
+        decay_duration: 200
+        decay_step: 40
+        range_x: 0.2
+        range_y: 0.2
+      </rosparam>
+    </node>
 
   </group>
 

@@ -86,7 +86,7 @@ void Pid::setGains(double P, double I, double D, double I1, double I2) {
 
 double Pid::updatePid(double error, ros::Duration dt) {
   double p_term, d_term, i_term;
-  p_error_ = error; //this is pError = pState-pTarget
+  p_error_ = error; // setpoint - state
 
   if (dt == ros::Duration(0.0) || std::isnan(error) || std::isinf(error))
     return 0.0;
@@ -122,7 +122,7 @@ double Pid::updatePid(double error, ros::Duration dt) {
   }
   // Calculate derivative contribution to command
   d_term = d_gain_ * d_error_;
-  cmd_ = -p_term - i_term - d_term;
+  cmd_ = p_term + i_term + d_term;
 
   return cmd_;
 }
