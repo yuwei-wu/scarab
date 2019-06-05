@@ -17,7 +17,6 @@
   <arg name="base_frame"    default="$(arg agent)/base_link" />
   <arg name="odom_frame"    default="$(arg agent)/odom" />
 
-
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
 
@@ -96,6 +95,8 @@
     <arg name="camera"     value="false"/>
     <arg name="hokuyo"     value="true"/>
     <arg name="laser_odom" value="true"/>
+    <arg name="base_frame" value="$(arg base_frame)"/>
+    <arg name="odom_frame" value="$(arg odom_frame)"/>
   </include>
 
 </launch>
