@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hfn)
 
 set(CMAKE_CXX_FLAGS "-frounding-math ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package(cmake_modules REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -34,10 +35,15 @@ add_executable(hfn src/hfn_node.cpp)
 target_link_libraries(hfn ${catkin_LIBRARIES} hfnlib playermap)
 add_dependencies(hfn ${PROJECT_NAME}_gencfg)
 
+add_executable(scarab_wp_node src/scarab_wp_node.cpp)
+target_link_libraries(scarab_wp_node ${catkin_LIBRARIES} ${YAMLCPP_LIBRARIES})
+add_dependencies(scarab_wp_node scarab_wp_node_generate_messages_cpp)
+
 install(TARGETS
     playermap
     hfn
     hfnlib
+    scarab_wp_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
