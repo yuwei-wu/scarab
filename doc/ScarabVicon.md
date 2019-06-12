@@ -24,6 +24,11 @@ ssh scarab@192.168.131.41
 roslaunch scarab navigation.launch use_vicon:=true
 ```
 
+Run a random goal publisher node (Goal generated within map bounds in config file)
+```
+roslaunch hfn scarab_wp.launch
+```
+
 Publish a geometry_msgs/PoseStamped on /scarab41/move_base_simple/goal
 If the robot does not move, your ROS_IP is not set. Use following
 
