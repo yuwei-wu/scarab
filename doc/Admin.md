@@ -32,15 +32,15 @@ sudo modprobe rtl8822be
 ```
 
 Scarab system config files are located in
-https://github.com/KumarRobotics/scarab/tree/devel_cleanup/config
+https://github.com/KumarRobotics/scarab/tree/devel_kinetic/config
 
 
 
 Copy network interfaces and wpa_supplicant file
 ```
 cd ~/Downloads
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/wpa_supplicant.conf
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/interfaces
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_kinetic/config/wpa_supplicant.conf
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_kinetic/config/interfaces
 ```
 Change the ip in interfaces file to reflect scarab id (example scarab44 will be 192.168.131.44, replace all ips)
 ```
@@ -50,7 +50,7 @@ sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
 
 Copy udev rules for setting USB persissions
 ```
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_cleanup/config/99-scarab.rules
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_kinetic/config/99-scarab.rules
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
 ```
@@ -108,7 +108,7 @@ catkin config -DCMAKE_BUILD_TYPE=Release
 cd src
 git clone https://github.com/KumarRobotics/scarab.git
 cd scarab
-git checkout -t origin/devel_cleanup
+git checkout -t origin/devel_kinetic
 catkin build
 ```
 

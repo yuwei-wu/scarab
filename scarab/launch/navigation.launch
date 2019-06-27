@@ -1,22 +1,20 @@
 <launch>
 
   <arg name="agent"         default="$(env AGENT)" />
-
   <arg name="use_vicon"     default="false"/>
+
   <arg name="odom_topic"    default="odom_vicon" if="$(arg use_vicon)"/>
   <arg name="odom_topic"    default="odom_laser" unless="$(arg use_vicon)"/>
-  <arg name="map_topic"     default="map"        if="$(arg use_vicon)"/>
-  <arg name="map_topic"     default="map_hokuyo" unless="$(arg use_vicon)"/>
+  <arg name="map_topic"     default="map"/>
 
   <arg name="cmd_vel_topic" default="cmd_vel"/>
   <arg name="scan_topic"    default="scan"/>
   <arg name="pose_topic"    default="pose"/>
   <arg name="goal_topic"    default="move_base_simple/goal"/>
 
-  <arg name="map_frame"     default="$(arg agent)/map_hokuyo" />
+  <arg name="map_frame"     default="$(arg agent)/map" />
   <arg name="base_frame"    default="$(arg agent)/base_link" />
   <arg name="odom_frame"    default="$(arg agent)/odom_laser" />
-
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
@@ -96,6 +94,8 @@
     <arg name="camera"     value="false"/>
     <arg name="hokuyo"     value="true"/>
     <arg name="laser_odom" value="true"/>
+    <arg name="base_frame" value="$(arg base_frame)"/>
+    <arg name="odom_frame" value="$(arg odom_frame)"/>
   </include>
 
 </launch>

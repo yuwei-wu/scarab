@@ -1,21 +1,23 @@
 <launch>
 
+  <!-- sensors -->
   <arg name="agent"       default="$(env AGENT)" />
   <arg name="laser_odom"  default="false" />
   <arg name="camera"      default="true" />
   <arg name="hokuyo"      default="true" />
-  <arg name="base_frame"  default="base_link" />
+
+  <!-- frames -->
+  <arg name="base_frame"  default="$(arg agent)/base_link" />
+  <arg name="odom_frame"  default="$(arg agent)/odom"/>
 
   <arg name="roboclaw_config_file" default="$(find roboclaw)/cfg/roboclaw.yaml" />
-
 
   <group ns="$(arg agent)">
 
     <!-- motor controller -->
     <node pkg="roboclaw" type="roboclaw_node" name="motor">
-      <param name="odom_frame"    value="$(arg agent)/odom_motor" />
-      <param name="base_frame"    value="$(arg agent)/$(arg base_frame)" />
-
+      <param name="odom_frame" value="$(arg agent)/odom_motor" /> <!-- the odom_frame arg is used exclusively for remapping laser odom frames and is not used here -->
+      <param name="base_frame" value="$(arg base_frame)" />
       <rosparam command="load" file="$(arg roboclaw_config_file)" />
     </node>
 
@@ -35,7 +37,7 @@
       <!-- static transform for xtion: base_link -> camera_link -->
       <node name="camera_tf_broadcaster" pkg="scarab"
             type="camera_tf_broadcaster.py" respawn="false" output="screen">
-        <param name="agent" type="string" value="$(arg agent)" />
+        <param name="agent" value="$(arg agent)" />
       </node>
 
     </group>
@@ -46,7 +48,7 @@
 
       <!-- static transform for hokuyo: base_link -> laser -->
       <node pkg="tf" type="static_transform_publisher" name="transformer"
-            args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg agent)/$(arg base_frame) $(arg agent)/laser 100" />
+            args="0.0 0.0 0.0 0.0 0.0 0.0 $(arg base_frame) $(arg agent)/laser 100" />
 
       <!-- hokuyo node -->
       <node name="laser" pkg="urg_node" type="urg_node" output="screen">
@@ -75,8 +77,8 @@
     <node name="laser_odom" pkg="laser_odom" type="laser_odom"
           output="screen" if="$(arg laser_odom)">
       <param name="debug" value="false" />
-      <param name="base_frame" value="$(arg agent)/base_link" />
-      <param name="odom_frame" value="$(arg agent)/odom_laser" />
+      <param name="base_frame" value="$(arg base_frame)" />
+      <param name="odom_frame" value="$(arg odom_frame)" />
       <rosparam>
         grid_resolution: 0.05
         sensor_sd: 0.02
