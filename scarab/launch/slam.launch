@@ -1,9 +1,14 @@
 <launch>
 
-  <!-- standalone launch file for running gmapping -->
-
   <arg name="agent"  default="$(env AGENT)" />
   <arg name="camera" default="false" /> <!-- don't need the asus for gmapping -->
+
+  <!-- map args -->
+  <arg name="map_res" default="0.05"/> <!-- map resolution -->
+  <arg name="xmin"    default="-50"/> <!-- initial map min bound in x -->
+  <arg name="ymin"    default="-50"/> <!-- initial map min bound in y -->
+  <arg name="xmax"    default="50"/>  <!-- initial map max bound in x -->
+  <arg name="ymax"    default="50"/>  <!-- initial map max bound in y -->
 
   <!-- scarab components -->
   <include file="$(find scarab)/launch/scarab.launch">
@@ -15,7 +20,12 @@
 
   <!-- gmapping -->
   <include file="$(find scarab)/launch/gmapping.launch">
-    <arg name="agent" value="$(arg agent)" />
+    <arg name="agent"   value="$(arg agent)" />
+    <arg name="map_res" value="$(arg map_res)"/>
+    <arg name="xmin"    value="$(arg xmin)"/>
+    <arg name="ymin"    value="$(arg ymin)"/>
+    <arg name="xmax"    value="$(arg xmax)"/>
+    <arg name="ymax"    value="$(arg ymax)"/>
   </include>
 
   <!-- publish robot pose from tf tree -->
