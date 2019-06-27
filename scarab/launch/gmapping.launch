@@ -4,9 +4,9 @@
 
   <arg name="scan_topic"  default="scan"/>
   <arg name="map_topic"   default="map_hokuyo"/>
-  <arg name="odom_frame"  default="$(arg agent)/odom_laser"/>
+  <arg name="odom_frame"  default="$(arg agent)/odom"/>
   <arg name="base_frame"  default="$(arg agent)/base_link"/>
-  <arg name="map_frame"   default="$(arg agent)/map_hokuyo"/>
+  <arg name="map_frame"   default="$(arg agent)/map"/>
 
   <group ns="$(arg agent)">
 

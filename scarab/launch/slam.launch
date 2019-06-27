@@ -25,7 +25,7 @@
         output="screen"
         ns="$(arg agent)">
     <param name="base_frame_id" value="$(arg agent)/base_link"/>
-    <param name="map_frame_id" value="$(arg agent)/map_hokuyo"/>
+    <param name="map_frame_id" value="$(arg agent)/map"/>
     <remap from="pose" to="pose" />
   </node>
 
