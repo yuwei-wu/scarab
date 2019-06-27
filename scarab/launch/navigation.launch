@@ -14,7 +14,7 @@
 
   <arg name="map_frame"     default="$(arg agent)/map" />
   <arg name="base_frame"    default="$(arg agent)/base_link" />
-  <arg name="odom_frame"    default="$(arg agent)/odom_laser" />
+  <arg name="odom_frame"    default="$(arg agent)/odom" />
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
