@@ -6,7 +6,6 @@
   <arg name="odom_topic"    default="odom_vicon" if="$(arg use_vicon)"/>
   <arg name="odom_topic"    default="odom_laser" unless="$(arg use_vicon)"/>
   <arg name="map_topic"     default="map"/>
-
   <arg name="cmd_vel_topic" default="cmd_vel"/>
   <arg name="scan_topic"    default="scan"/>
   <arg name="pose_topic"    default="pose"/>
@@ -15,6 +14,13 @@
   <arg name="map_frame"     default="$(arg agent)/map" />
   <arg name="base_frame"    default="$(arg agent)/base_link" />
   <arg name="odom_frame"    default="$(arg agent)/odom" />
+
+  <!-- gmapping map args -->
+  <arg name="map_res" default="0.05"/> <!-- map resolution -->
+  <arg name="xmin"    default="-50"/>  <!-- initial map min bound in x -->
+  <arg name="ymin"    default="-50"/>  <!-- initial map min bound in y -->
+  <arg name="xmax"    default="50"/>   <!-- initial map max bound in x -->
+  <arg name="ymax"    default="50"/>   <!-- initial map max bound in y -->
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
@@ -47,11 +53,17 @@
   <group unless="$(arg use_vicon)">
 
     <include file="$(find scarab)/launch/gmapping.launch">
+      <arg name="agent"       value="$(arg agent)" />
       <arg name="scan_topic"  value="$(arg scan_topic)"/>
       <arg name="map_topic"   value="$(arg map_topic)"/>
       <arg name="odom_frame"  value="$(arg odom_frame)"/>
       <arg name="base_frame"  value="$(arg base_frame)"/>
       <arg name="map_frame"   value="$(arg map_frame)"/>
+      <arg name="map_res"     value="$(arg map_res)"/>
+      <arg name="xmin"        value="$(arg xmin)"/>
+      <arg name="ymin"        value="$(arg ymin)"/>
+      <arg name="xmax"        value="$(arg xmax)"/>
+      <arg name="ymax"        value="$(arg ymax)"/>
     </include>
 
   </group>
