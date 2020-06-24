@@ -220,7 +220,7 @@ int LaserSimulator::LoadDynamicModels(const ros::NodeHandle& n)
                       return -1;
                     }
 
-                  types.insert(std::make_pair<std::string,
+                  types.insert(std::pair<std::string,
                                boost::tuple<double, double, double> >
                                (id, boost::make_tuple(xdim, ydim, zdim)));
                 }
