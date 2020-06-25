@@ -4,7 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded: ~
-      Splitter Ratio: 0.5908183455467224
+      Splitter Ratio: 0.7777777910232544
     Tree Height: 1886
   - Class: rviz/Selection
     Name: Selection
@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -304,6 +304,158 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_footprint:
+          Value: true
+        base_link:
+          Value: false
+        camera_depth_frame:
+          Value: false
+        camera_depth_optical_frame:
+          Value: false
+        camera_link:
+          Value: false
+        camera_rgb_frame:
+          Value: false
+        camera_rgb_optical_frame:
+          Value: false
+        caster_back_link:
+          Value: false
+        caster_front_link:
+          Value: false
+        laser:
+          Value: true
+        plate_bottom_link:
+          Value: false
+        plate_middle_link:
+          Value: false
+        plate_top_link:
+          Value: false
+        pole_bottom_0_link:
+          Value: false
+        pole_bottom_1_link:
+          Value: false
+        pole_bottom_2_link:
+          Value: false
+        pole_bottom_3_link:
+          Value: false
+        pole_bottom_4_link:
+          Value: false
+        pole_bottom_5_link:
+          Value: false
+        pole_kinect_0_link:
+          Value: false
+        pole_kinect_1_link:
+          Value: false
+        pole_middle_0_link:
+          Value: false
+        pole_middle_1_link:
+          Value: false
+        pole_middle_2_link:
+          Value: false
+        pole_middle_3_link:
+          Value: false
+        pole_top_0_link:
+          Value: false
+        pole_top_1_link:
+          Value: false
+        pole_top_2_link:
+          Value: false
+        pole_top_3_link:
+          Value: false
+        scarab40/ground_truth/base_link:
+          Value: true
+        scarab40/ground_truth/odom:
+          Value: true
+        scarab40/laser:
+          Value: true
+        scarab40/map:
+          Value: true
+        scarab40/odom:
+          Value: true
+        wheel_left_link:
+          Value: false
+        wheel_right_link:
+          Value: false
+        world:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          scarab40/map:
+            scarab40/odom:
+              scarab40/ground_truth/odom:
+                scarab40/ground_truth/base_link:
+                  base_footprint:
+                    base_link:
+                      camera_rgb_frame:
+                        camera_depth_frame:
+                          camera_depth_optical_frame:
+                            {}
+                        camera_link:
+                          {}
+                        camera_rgb_optical_frame:
+                          {}
+                      caster_back_link:
+                        {}
+                      caster_front_link:
+                        {}
+                      laser:
+                        scarab40/laser:
+                          {}
+                      plate_bottom_link:
+                        {}
+                      plate_middle_link:
+                        {}
+                      plate_top_link:
+                        {}
+                      pole_bottom_0_link:
+                        {}
+                      pole_bottom_1_link:
+                        {}
+                      pole_bottom_2_link:
+                        {}
+                      pole_bottom_3_link:
+                        {}
+                      pole_bottom_4_link:
+                        {}
+                      pole_bottom_5_link:
+                        {}
+                      pole_kinect_0_link:
+                        {}
+                      pole_kinect_1_link:
+                        {}
+                      pole_middle_0_link:
+                        {}
+                      pole_middle_1_link:
+                        {}
+                      pole_middle_2_link:
+                        {}
+                      pole_middle_3_link:
+                        {}
+                      pole_top_0_link:
+                        {}
+                      pole_top_1_link:
+                        {}
+                      pole_top_2_link:
+                        {}
+                      pole_top_3_link:
+                        {}
+                      wheel_left_link:
+                        {}
+                      wheel_right_link:
+                        {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -341,7 +493,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 114.91307067871094
+      Scale: 356.9025573730469
       Target Frame: <Fixed Frame>
       X: 1.012380838394165
       Y: -0.4863511323928833
