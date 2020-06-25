@@ -94,6 +94,6 @@
 	</link>
 	
 	<!-- Kinect sensor for simulation -->
-	<turtlebot_sim_3dsensor/>
+	<xacro:turtlebot_sim_3dsensor/>
   </xacro:macro>
 </robot>
