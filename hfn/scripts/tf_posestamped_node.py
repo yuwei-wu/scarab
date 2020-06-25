@@ -1,32 +1,32 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('hfn')
 import rospy
 import tf
 
 from geometry_msgs.msg import PoseStamped
 
 def main():
+
     rospy.init_node('pose_stamped')
 
-    base_frame = rospy.get_param("~base_frame_id", "base")
-    map_frame = rospy.get_param("~map_frame_id", "map")
-    pose_pub = rospy.Publisher("pose", PoseStamped, queue_size = 5)
+    base_frame = rospy.get_param('~base_frame_id', 'base')
+    map_frame = rospy.get_param('~map_frame_id', 'map')
+    pose_pub = rospy.Publisher('pose', PoseStamped, queue_size = 5)
 
     tf_sub = tf.TransformListener()
 
     rate = rospy.Rate(10.0)
     last_pub = rospy.Time.now()
     while not rospy.is_shutdown():
+
         dur = last_pub - rospy.Time.now()
         if dur > rospy.Duration(5.0):
-            rospy.logwarn("tf_posestamped_node: Haven't published pose in %f seconds",
+            rospy.logwarn('tf_posestamped_node: last published pose %f seconds ago',
                           dur.to_sec())
         try:
-            (trans,rot) = tf_sub.lookupTransform(map_frame, base_frame,
-                                                 rospy.Time(0))
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException), e:
-            rospy.logwarn("%s" % e)
+            (trans,rot) = tf_sub.lookupTransform(map_frame, base_frame, rospy.Time(0))
+        except tf.Exception as err:
+            rospy.logwarn(err)
             rospy.sleep(1.0)
             continue
 
