@@ -9,7 +9,7 @@
   <arg name="world_name"  default="$(find scarab_gazebo)/worlds/levine.world"/>
   <arg name="verbose"     default="false"/>
   <arg name="debug"       default="false"/>
-  <arg name="gazebo_gui"  default="false"/>
+  <arg name="gazebo_gui"  default="true"/>
 
   <!-- tf args -->
   <arg name="base_frame"    default="base_footprint" />
@@ -43,14 +43,14 @@
   <node pkg="tf2_ros"
         type="static_transform_publisher"
         name="odom_static_tf_broadcaster"
-        args="0 0 0 0 0 0 $(arg odom_frame) $(arg agent)/ground_truth/odom"
+        args="0 0 0 0 0 0 $(arg odom_frame) ground_truth/odom"
         if="$(arg ground_truth)"/>
 
   <!-- publish static transform between world_frame and map_frame -->
   <node pkg="tf2_ros"
         type="static_transform_publisher"
         name="base_static_tf_broadcaster"
-        args="0 0 0 0 0 0 $(arg agent)/ground_truth/base_link $(arg base_frame)"
+        args="0 0 0 0 0 0 ground_truth/base_link $(arg base_frame)"
         if="$(arg ground_truth)"/>
 
   <!-- load levine world -->
