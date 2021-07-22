@@ -45,9 +45,9 @@ int main(int argc, char** argv)
         twist.linear.x += v_inc;
       } else if (ch == 's') {
         twist.linear.x -= v_inc;
-      } else if (ch == 'd') {
-        twist.angular.z += w_inc;
       } else if (ch == 'a') {
+        twist.angular.z += w_inc;
+      } else if (ch == 'd') {
         twist.angular.z -= w_inc;
       } else if (ch == ' ') {
         twist.angular.z = 0;

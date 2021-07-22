@@ -47,8 +47,8 @@
         <alwaysOn>true</alwaysOn>
         <updateRate>10</updateRate>
         <!-- BWC: This is intentionally flipped; not sure why necessary -->
-        <leftJoint>wheel_right_joint</leftJoint>
-        <rightJoint>wheel_left_joint</rightJoint>
+        <leftJoint>wheel_left_joint</leftJoint>
+        <rightJoint>wheel_right_joint</rightJoint>
         <wheelSeparation>0.230</wheelSeparation>
         <wheelDiameter>0.070</wheelDiameter>
         <torque>1.0</torque>
