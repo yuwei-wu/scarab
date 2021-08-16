@@ -19,6 +19,8 @@ sudo make install
 sudo modprobe rtl8822be
 ```
 
+TODO: Check the network interface issue with Ubuntu 20.04
+
 Scarab system config files are located in
 https://github.com/KumarRobotics/scarab/tree/devel_noetic/config
 
@@ -89,7 +91,7 @@ Setup catkin workspace
 ```
 cd ~
 mkdir -p ws_scarab/src
-cd ~/ws_scarab/src
+cd ~/ws_scarab
 catkin init
 catkin config -DCMAKE_BUILD_TYPE=Release
 cd src
@@ -99,15 +101,16 @@ git checkout -t origin/devel_noetic
 catkin build
 ```
 
-Change the AGENT to reflect the current scarab id
+Change the AGENT and ROS IP to reflect the current scarab id
 ```
 echo "export AGENT=scarab40" >> ~/.bashrc
-echo "export ROS_HOSTNAME=$AGENT" >> ~/.bashrc
+echo "export ROS_IP=192.168.131.40" >> ~/.bashrc
+echo "export ROS_MASTER_URI=http://$ROS_IP:11311
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
-
-Turn on the H-BRDG and ROBO CLAW PWR switches
-
+```
+Turn on the H-BRDG and ROBO CLAW PWR switches, then run:
+```
 roslaunch scarab scarab.launch
 ```
 
