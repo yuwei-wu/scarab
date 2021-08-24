@@ -148,8 +148,9 @@ echo "export ROS_IP=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]
 Set ROS_MASTER_URI in .bashrc: The following bash commands sets the ROS_MASTER_URI to the IP of the ssh_client. Users don't have to explicitely set this.
 
 ```
-echo "export MASTER_IP="${SSH_CLIENT%% *}"
-if [[ !  -z  $MASTER_IP  ]];then
+echo "export MASTER_IP="${SSH_CLIENT%% *}" >> ~/.bashrc
+source ~/.bashrc
+echo "if [[ !  -z  $MASTER_IP  ]];then
    export ROS_MASTER_URI=http://${MASTER_IP}:11311
 fi " >> ~/.bashrc
 ```
