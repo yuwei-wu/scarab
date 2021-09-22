@@ -13,7 +13,7 @@ sudo apt remove unattended-upgrades
 
 Copy udev rules for setting USB permissions:
 ```
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_kinetic/config/99-scarab.rules
+wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_noetic/config/99-scarab.rules
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
 ```
