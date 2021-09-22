@@ -11,7 +11,7 @@ Go to your catkin workspace, inside ```catkin_ws```:
 catkin init
 catkin config -DCMAKE_BUILD_TYPE=Release
 cd src
-git clone -b devel_noetic git@github.com:tyuezhan/scarab.git
+git clone -b devel_noetic git@github.com:KumarRobotics/scarab.git
 ```
 
 Build and run:
