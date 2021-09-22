@@ -1,49 +1,24 @@
 # Scarab setup instructions for Ubuntu 20.04 and ROS Noetic
 
-Install Ubunutu 20.04. Make admin user `scarab_admin` and hostname `scarab#`, replacing # with the scarab's ID.
+Install Ubunutu 20.04. Choose not to connect to the internet during setup and choose the minimal installation option. Make an admin user `scarab_admin` with hostname `scarab<id>`, replacing `<id>` with the scarab's ID. Throughout these instructions, all instances of `<id>` should be replaced with the scarab's ID.
 
-Update, Upgrade
+After restarting and removing the installation medium, configure a connection to the scarab network using NetworkManager with a manual IP address of `192.168.131.<id>`, Netmask of `255.255.255.255`, Gateway of `192.168.131.1`, and DNS of `192.168.131.1`. Once connected, you can verify the settings were successful by viewing the Details tab of the scarab network settings in NetworkManager or manually on the command line by running `ip address show` to check the right IP address was assigned and `ping www.google.com` to verify internet access.
+
+Ensure system packages are up to date and disable unattended upgrades:
 ```
 sudo apt update
 sudo apt upgrade
+sudo apt remove unattended-upgrades
 ```
 
-If WiFi does not work automatically, you must install the diver manually (note that this has to be repeated every time the kernel is updated).
-```
-cd ~/Downloads
-wget https://github.com/lwfinger/rtlwifi_new/archive/extended.zip
-unzip extended.zip
-cd rtlwifi_new-extended
-make
-sudo make install
-sudo modprobe rtl8822be
-```
-
-TODO: Check the network interface issue with Ubuntu 20.04
-
-Scarab system config files are located in
-https://github.com/KumarRobotics/scarab/tree/devel_noetic/config
-
-
-Copy network interfaces and wpa_supplicant file
-```
-cd ~/Downloads
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_noetic/config/wpa_supplicant.conf
-wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_noetic/config/interfaces
-```
-Change the ip in interfaces file to reflect scarab id (example scarab44 will be 192.168.131.44, replace all ips)
-```
-sudo cp interfaces /etc/network/
-sudo cp wpa_supplicant.conf /etc/wpa_supplicant/
-```
-
-Copy udev rules for setting USB persissions
+Copy udev rules for setting USB permissions:
 ```
 wget https://raw.githubusercontent.com/KumarRobotics/scarab/devel_kinetic/config/99-scarab.rules
 sudo cp 99-scarab.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules && udevadm trigger
 ```
-Disable automatic updates (because they mess up the wifi)
+
+Disable automatic updates:
 ```
 Open the Software Updater settings
 Go to the Updates tab
@@ -53,106 +28,93 @@ When there are security updates: Display immediately
 When there are other updates: Display weekly
 ```
 
-Install ROS Noetic (ros-noetic-desktop-full)
-http://wiki.ros.org/noetic/Installation
+Install ROS Noetic (ros-noetic-desktop-full) following the instructions at: http://wiki.ros.org/noetic/Installation.
 
-Other ROS packages
+Install additional packages used by the scarab:
 ```
-sudo apt install ros-noetic-urg-node ros-noetic-joy
-```
-
-Scarab dependencies to install
-```
-sudo apt install libarmadillo-dev libncurses5-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev libnl-nf-3-dev libcgal-dev libcgal-qt5-dev
-```
-Install Primesense camera ROS packages
-```
-sudo apt install ros-noetic-rgbd-launch ros-noetic-openni2-camera ros-noetic-openni2-launch
-```
-Install gmapping package
-```
-sudo apt install ros-noetic-gmapping
+sudo apt install ros-noetic-urg-node ros-noetic-joy libarmadillo-dev libncurses5-dev libnl-3-dev \
+                 libnl-route-3-dev libnl-genl-3-dev libnl-nf-3-dev libcgal-dev libcgal-qt5-dev \
+                 ros-noetic-rgbd-launch ros-noetic-openni2-camera ros-noetic-openni2-launch \
+                 ros-noetic-gmapping openssh-server vim emacs tmux tmuxinator python3-osrf-pycommon \
+                 python3-catkin-tools git net-tools
 ```
 
-Install other packages
-```
-sudo apt install openssh-server vim emacs tmux tmuxinator python3-osrf-pycommon python3-catkin-tools git net-tools
-```
-
-Set up servo motor (TODO: change to dynamixel_sdk)
+Set up servo motor (TODO: change to dynamixel_sdk):
 ```
 sudo apt install ros-noetic-dynamixel-motor
 sudo usermod -a -G dialout $USER
 sudo chmod 777 /dev/ttyUSB0
 ```
-On scarab, make sure mode switch on servo controller is all the way towards the end the USB connects to.
+On scarab, make sure the mode switch on the servo controller is all the way towards the end the USB connects to.
 
-Setup catkin workspace
+Setup a catkin workspace:
 ```
 cd ~
 mkdir -p ws_scarab/src
 cd ~/ws_scarab
-catkin init
-catkin config -DCMAKE_BUILD_TYPE=Release
-cd src
-git clone https://github.com/KumarRobotics/scarab.git
-cd scarab
-git checkout -t origin/devel_noetic
+catkin config --init -DCMAKE_BUILD_TYPE=Release --extend /opt/ros/noetic
+git clone --branch devel_noetic --single-branch https://github.com/KumarRobotics/scarab.git src/scarab
 catkin build
 ```
 
-Change the AGENT and ROS IP to reflect the current scarab id
+Configure common ROS environment variables and source calls, being sure to replace `<id>` with the appropriate scarab id number:
 ```
-echo "export AGENT=scarab40" >> ~/.bashrc
-echo "export ROS_IP=192.168.131.40" >> ~/.bashrc
-echo "export ROS_MASTER_URI=http://$ROS_IP:11311
+echo "export AGENT=scarab<id>" >> ~/.bashrc
+echo "export ROS_IP=192.168.131.<id>" >> ~/.bashrc
+echo "export ROS_MASTER_URI=http://192.168.131.<id>:11311"
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
 ```
-Turn on the H-BRDG and ROBO CLAW PWR switches, then run:
+Turn on the H-BRDG and ROBO CLAW PWR switches, then run to test the admin user was setup successfully:
 ```
 roslaunch scarab scarab.launch
 ```
 
-Install scarab drivers to system. catkin-tools provides profiles for devel/install space
+Install scarab drivers to the system. catkin-tools provides profiles for devel/install space
 http://catkin-tools.readthedocs.io/en/latest/verbs/catkin_profile.html
 ```
 cd ~/ws_scarab
-catkin profile add install
+catkin config --profile install --install -DCMAKE_BUILD_TYPE=Release --extend /opt/ros/noetic
 catkin profile set install
-catkin config --install -DCMAKE_BUILD_TYPE=Release 
 catkin clean
 catkin build
 ```
-This will create 'install' folder in the workspace. Copy it to system location.
-
+This will create an 'install' folder in the workspace. Copy it to system location:
 ```
-sudo cp -r install /opt/ros/scarab/
+sudo rsync -azP ~/ws_scarab/install/ /opt/ros/scarab
 ```
+Remember to execute the above command every time you update ws_scarab. Note that it prints each file that gets update (i.e. copied to /opt/ros/scarab) to the console - this can be a useful sanity check to verify expected changes did actually happen.
 
-Making account for other users
+Make a scarab user account with the password 'mrsl':
 ```
 sudo adduser scarab
 sudo usermod -a -G dialout scarab
 ```
-set password to 'mrsl'
 
-ssh to 'scarab' user
+Now, switch to the newly created 'scarab' user account:
+```
+su scarab
+cd  # be sure to switch to the scarab user's home directory
+```
+and configure its .bashrc with common ROS environment variables and source calls:
 ```
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 echo "source /opt/ros/scarab/setup.bash" >> ~/.bashrc
-echo "export AGENT=scarab40" >> ~/.bashrc
-echo "export ROS_IP=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')" >> ~/.bashrc
+echo "export AGENT=scarab<id>" >> ~/.bashrc
+echo "export ROS_IP=$(ifconfig | sed -En 's/.*inet (192.168.131.[0-9]*).*/\1/p')" >> ~/.bashrc
 ```
 
-Set ROS_MASTER_URI in .bashrc: The following bash commands sets the ROS_MASTER_URI to the IP of the ssh_client. Users don't have to explicitely set this.
+Add the following snippet to .bashrc, which conveniently sets ROS_MASTER_URI to the IP of the ssh_client so users don't have to explicitely do this every time they connect:
 
 ```
-echo "export MASTER_IP=${SSH_CLIENT%% *}" >> ~/.bashrc
+echo 'export MASTER_IP=${SSH_CLIENT%% *}' >> ~/.bashrc
 source ~/.bashrc
-echo "if [[ !  -z  $MASTER_IP  ]];then
+echo 'if [[ ! -z $MASTER_IP ]]; then
    export ROS_MASTER_URI=http://${MASTER_IP}:11311
-fi " >> ~/.bashrc
+fi' >> ~/.bashrc
 ```
 
-Test the launch files
+Finally, verify the scarab user account's ROS installation:
+```
+roslaunch scarab scarab.launch
+```
