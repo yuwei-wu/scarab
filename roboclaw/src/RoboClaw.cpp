@@ -234,7 +234,7 @@ void RoboClaw::setSerial(USBSerial *ser) {
 size_t RoboClaw::write(uint8_t byte)
 {
   // fprintf(stderr, "Sending: 0x%02x\n", byte);
-  ser_->Write(&byte, 1);
+  return ser_->Write(&byte, 1);
 }
 
 uint8_t RoboClaw::read()
