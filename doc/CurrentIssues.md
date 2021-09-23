@@ -8,5 +8,6 @@
 | Dinesh | get vicon odom working |
 |    ?   | get transforms for base_link to camera_link from Terry (?) |
 |    ?   | user manual/guide on github |
+|    ?   | clean out dead code from past scarab iterations? (e.g. bb04, mesh80211, etc.)|
 
 ## Known Issues
