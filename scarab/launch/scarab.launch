@@ -15,7 +15,7 @@
   <group ns="$(arg agent)">
 
     <!-- motor controller -->
-    <node pkg="roboclaw" type="roboclaw_node" name="motor">
+    <node pkg="roboclaw" type="roboclaw_node" name="motor" output="screen">
       <param name="odom_frame" value="$(arg agent)/odom_motor" /> <!-- the odom_frame arg is used exclusively for remapping laser odom frames and is not used here -->
       <param name="base_frame" value="$(arg base_frame)" />
       <rosparam command="load" file="$(arg roboclaw_config_file)" />

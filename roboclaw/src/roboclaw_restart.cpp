@@ -1,5 +1,5 @@
 #include "RoboClaw.h"
 
-int main(int argc, char **argv) {
+int main() {
   return roboclaw_restart_usb();
 }

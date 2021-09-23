@@ -73,7 +73,7 @@ class DifferentialDriver {
       bool ret = claw_->ReadVersion(address_, ver);
       if(ret){
         std::string version(ver);
-        ROS_ERROR("Version: %s", version.c_str());
+        ROS_INFO("Version: %s", version.c_str());
       }
 
       pub_ = nh_.advertise<roboclaw::motor_state>("motor_state", 5);
