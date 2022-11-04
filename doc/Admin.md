@@ -1,4 +1,4 @@
-#Scarab setup instructions for Ubuntu 20.04 and ROS Noetic
+# Scarab setup instructions for Ubuntu 20.04 and ROS Noetic
 
 Install Ubunutu 20.04. Choose not to connect to the internet during setup and choose the minimal installation option. Make an admin user `scarab_admin` with hostname `scarab<id>`, replacing `<id>` with the scarab's ID. Throughout these instructions, all instances of `<id>` should be replaced with the scarab's ID.                                                                                                                
 After restarting and removing the instaalion media, connect to the 'scarab' wifi network (get password from lab admins). Go to Settings->Wi-Fi and click on the gear icon next to the scarab network. From there go to IPv4 and set the IPv4 Method to Manual. Enter the following information:                                                                                                                                           
