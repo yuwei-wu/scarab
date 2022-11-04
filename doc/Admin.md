@@ -30,7 +30,7 @@ Open the Software Updater settings
 Go to the Updates tab
 Change the drop down menus to:
 Automatically check for updates: Weekly
-When there are security updates: Display immediately
+When there are security updates: Display immediately <-- This might be greyed out, if so, don't worry about it
 When there are other updates: Display weekly
 ```
 
@@ -67,7 +67,7 @@ Configure common ROS environment variables and source calls, being sure to repla
 ```
 echo "export AGENT=scarab<id>" >> ~/.bashrc
 echo "export ROS_IP=192.168.131.<id>" >> ~/.bashrc
-echo "export ROS_MASTER_URI=http://192.168.131.<id>:11311"
+echo "export ROS_MASTER_URI=http://192.168.131.<id>:11311" >> ~/.bashrc
 source ~/.bashrc
 source ~/ws_scarab/devel/setup.bash
 ```
