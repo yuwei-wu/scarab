@@ -2,7 +2,7 @@
 
 Install Ubunutu 20.04. Choose not to connect to the internet during setup and choose the minimal installation option. Make an admin user `scarab_admin` with hostname `scarab<id>`, replacing `<id>` with the scarab's ID. Throughout these instructions, all instances of `<id>` should be replaced with the scarab's ID.
 
-After restarting and removing the instaalion media, connect to the 'scarab' wifi network (get password from lab admins). Go to Settings-->Wi-Fi and click on the gear icon next to the scarab network. From there go to IPv4 and set the IPv4 Method to Manual. Enter the following information:
+After restarting and removing the installation media, connect to the 'scarab' wifi network (get password from lab admins). Go to Settings-->Wi-Fi and click on the gear icon next to the scarab network. From there go to IPv4 and set the IPv4 Method to Manual. Enter the following information:
 
 IP address: `192.168.131.<id>`\
 Netmask: `255.255.255.255`\
@@ -11,7 +11,9 @@ Gateway: `192.168.131.1`
 Turn off the Automatic toggle next to DNS and enter the following information:\
 DNS: `192.168.131.1`
 
-Once connected, you can verify the settings were successful by viewing the Details tab of the scarab network settings in the same windo or manually on the command line by running `ip address show` to check the right IP address was assigned and `ping www.google.com` to verify internet access. If you are having issues connecting to the internet, verify the above information and perform a reboot, this is a common issue to see.
+Once connected, you can verify the settings were successful by viewing the Details tab of the scarab network settings in the same window or manually on the command line by running `ip address show` to check the right IP address was assigned and `ping www.google.com` to verify internet access. If you are having issues connecting to the internet, executing the following might solve the connection issue:\
+`sudo systemctl restart NetworkManager.service`\
+If the issue persists, a restart should resolve this issue.
 
 Ensure system packages are up to date and disable unattended upgrades:
 ```
