@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <robot>
-  <joint name="hokuyo_joint" type="fixed">
+  <joint name="$(arg tf_prefix)/hokuyo_joint" type="fixed">
     <axis xyz="0 1 0" />
     <origin xyz="${cam_px} ${cam_py} 0.43" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="laser"/>
+    <parent link="$(arg tf_prefix)/base_link"/>
+    <child link="$(arg tf_prefix)/laser"/>
   </joint>
 
   <!-- Hokuyo Laser -->
-  <link name="laser">
+  <link name="$(arg tf_prefix)/laser">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-	<box size="0.1 0.1 0.1"/>
+        <box size="0.1 0.1 0.1"/>
       </geometry>
     </collision>
 
@@ -31,7 +31,7 @@
   </link>
 
   <!-- Simulate UTM-30LX -->
-  <gazebo reference="laser">
+  <gazebo reference="$(arg tf_prefix)/laser">
     <sensor type="ray" name="head_hokuyo_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
@@ -41,9 +41,9 @@
           <horizontal>
             <samples>1024</samples>
             <resolution>1</resolution>
-            <!-- +/- 135 degrees -->            
+            <!-- +/- 135 degrees -->
             <min_angle>-2.356194</min_angle>
-            <max_angle>2.356194</max_angle> 
+            <max_angle>2.356194</max_angle>
           </horizontal>
         </scan>
         <range>
@@ -63,7 +63,7 @@
       </ray>
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>scan</topicName>
-        <frameName>laser</frameName>
+        <frameName>$(arg tf_prefix)/laser</frameName>
       </plugin>
     </sensor>
   </gazebo>
