@@ -7,6 +7,8 @@
 <robot name="scarab" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:arg name="tf_prefix" default="scarab"/>
+  <xacro:arg name="camera"    default="true"/>
+  <xacro:arg name="hokuyo"    default="true"/>
 
   <xacro:include filename="$(find scarab_description)/urdf/common_properties.urdf.xacro"/>
   <xacro:include filename="$(find scarab_description)/urdf/turtlebot_properties.urdf.xacro"/>
@@ -19,7 +21,11 @@
 
   <xacro:kobuki/>
   <xacro:stack_hexagons parent="$(arg tf_prefix)/base_link" prefix="$(arg tf_prefix)"/>
-  <xacro:sensor_kinect  parent="$(arg tf_prefix)/base_link" prefix="$(arg tf_prefix)"/>
-  <xacro:include filename="$(find scarab_description)/urdf/sensors/hokuyo.gazebo" />
+  <xacro:if value="$(arg camera)">
+    <xacro:sensor_kinect parent="$(arg tf_prefix)/base_link" prefix="$(arg tf_prefix)"/>
+  </xacro:if>
+  <xacro:if value="$(arg hokuyo)">
+    <xacro:include filename="$(find scarab_description)/urdf/sensors/hokuyo.gazebo" />
+  </xacro:if>
 
 </robot>

@@ -7,6 +7,8 @@
   <arg name="spawn_x" default="0.0"/>
   <arg name="spawn_y" default="0.0"/>
   <arg name="spawn_z" default="1.0"/>
+  <arg name="camera"  default="true"/> <!-- enable simulated kinect in gazebo -->
+  <arg name="hokuyo"  default="true"/> <!-- enable simulated hokuyo in gazebo -->
 
   <!-- tf args -->
   <arg name="base_frame"    default="$(arg agent)/base_footprint" />
@@ -43,7 +45,7 @@
     <!-- load robot urdf to param -->
     <param name="robot_description"
            command="$(find xacro)/xacro $(find scarab_description)/urdf/scarab.xacro
-                    tf_prefix:=$(arg agent)" />
+                    tf_prefix:=$(arg agent) camera:=$(arg camera) hokuyo:=$(arg hokuyo)" />
 
     <!-- spawn robot in gazebo -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" output="screen"
