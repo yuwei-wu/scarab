@@ -17,10 +17,10 @@
 
   <!-- gmapping map args -->
   <arg name="map_res" default="0.05"/> <!-- map resolution -->
-  <arg name="xmin"    default="-50"/>  <!-- initial map min bound in x -->
-  <arg name="ymin"    default="-50"/>  <!-- initial map min bound in y -->
-  <arg name="xmax"    default="50"/>   <!-- initial map max bound in x -->
-  <arg name="ymax"    default="50"/>   <!-- initial map max bound in y -->
+  <arg name="map_xmin"    default="-50"/>  <!-- initial map min bound in x -->
+  <arg name="map_ymin"    default="-50"/>  <!-- initial map min bound in y -->
+  <arg name="map_xmax"    default="50"/>   <!-- initial map max bound in x -->
+  <arg name="map_ymax"    default="50"/>   <!-- initial map max bound in y -->
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
@@ -60,10 +60,10 @@
       <arg name="base_frame"  value="$(arg base_frame)"/>
       <arg name="map_frame"   value="$(arg map_frame)"/>
       <arg name="map_res"     value="$(arg map_res)"/>
-      <arg name="xmin"        value="$(arg xmin)"/>
-      <arg name="ymin"        value="$(arg ymin)"/>
-      <arg name="xmax"        value="$(arg xmax)"/>
-      <arg name="ymax"        value="$(arg ymax)"/>
+      <arg name="xmin"        value="$(arg map_xmin)"/>
+      <arg name="ymin"        value="$(arg map_ymin)"/>
+      <arg name="xmax"        value="$(arg map_xmax)"/>
+      <arg name="ymax"        value="$(arg map_ymax)"/>
     </include>
 
   </group>

@@ -10,6 +10,12 @@
   <arg name="camera"  default="true"/> <!-- enable simulated kinect in gazebo -->
   <arg name="hokuyo"  default="true"/> <!-- enable simulated hokuyo in gazebo -->
 
+  <!-- gmapping args -->
+  <arg name="map_xmin" default="-50.0"/>
+  <arg name="map_xmax" default="50.0"/>
+  <arg name="map_ymin" default="-50.0"/>
+  <arg name="map_ymax" default="50.0"/>
+
   <!-- tf args -->
   <arg name="base_frame"    default="$(arg agent)/base_footprint" />
   <arg name="odom_frame"    default="$(arg agent)/odom" />
@@ -95,6 +101,10 @@
       <param name="base_frame" value="$(arg base_frame)" />
       <param name="odom_frame" value="$(arg odom_frame)"/>
       <param name="map_frame"  value="$(arg map_frame)" />
+      <param name="xmin"      value="$(arg map_xmin)"/>
+      <param name="xmax"      value="$(arg map_xmax)"/>
+      <param name="ymin"      value="$(arg map_ymin)"/>
+      <param name="ymax"      value="$(arg map_ymax)"/>
     </node>
 
   </group>
