@@ -32,7 +32,7 @@
 
   <!-- ROBOTS -->
 
-  <include file="$(find perch_experiment)/launch/scarab_sim.launch">
+  <include file="$(find scarab)/launch/scarab_sim.launch">
     <arg name="agent"   value="$(arg agent)"/>
   </include>
 
