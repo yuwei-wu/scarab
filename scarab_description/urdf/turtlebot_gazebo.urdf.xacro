@@ -5,7 +5,7 @@
     <gazebo reference="$(arg tf_prefix)/camera_link">
       <sensor type="depth" name="camera">
         <always_on>true</always_on>
-        <update_rate>5</update_rate>
+        <update_rate>20</update_rate>
         <camera>
           <horizontal_fov>${60.0*M_PI/180.0}</horizontal_fov>
           <image>
@@ -15,13 +15,13 @@
           </image>
           <clip>
             <near>0.1</near>
-            <far>50.0</far>
+            <far>5.0</far>
           </clip>
         </camera>
         <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
           <cameraName>camera</cameraName>
           <alwaysOn>true</alwaysOn>
-          <updateRate>5</updateRate>
+          <updateRate>20</updateRate>
           <imageTopicName>rgb/image_raw</imageTopicName>
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
           <pointCloudTopicName>depth/points</pointCloudTopicName>
@@ -33,8 +33,8 @@
           <distortion_k3>0.0</distortion_k3>
           <distortion_t1>0.0</distortion_t1>
           <distortion_t2>0.0</distortion_t2>
-          <pointCloudCutoff>0.4</pointCloudCutoff>
-          <pointCloudCutoffMax>50.0</pointCloudCutoffMax>
+          <pointCloudCutoff>0.1</pointCloudCutoff>
+          <pointCloudCutoffMax>5.0</pointCloudCutoffMax>
         </plugin>
       </sensor>
     </gazebo>

@@ -17,7 +17,7 @@
 
   <!-- 3D Sensors -->
   <xacro:include filename="$(find scarab_description)/urdf/sensors/kinect.urdf.xacro"/>
-  <xacro:include filename="$(find scarab_description)/urdf/sensors/asus_xtion_pro.urdf.xacro"/>
+  <!-- <xacro:include filename="$(find scarab_description)/urdf/sensors/asus_xtion_pro.urdf.xacro"/> -->
 
   <xacro:kobuki/>
   <xacro:stack_hexagons parent="$(arg tf_prefix)/base_link" prefix="$(arg tf_prefix)"/>
