@@ -10,10 +10,10 @@
 
   <!-- map args -->
   <arg name="map_res" default="0.05"/> <!-- map resolution -->
-  <arg name="map_xmin"    default="-50"/> <!-- initial map min bound in x -->
-  <arg name="map_ymin"    default="-50"/> <!-- initial map min bound in y -->
-  <arg name="map_xmax"    default="50"/>  <!-- initial map max bound in x -->
-  <arg name="map_ymax"    default="50"/>  <!-- initial map max bound in y -->
+  <arg name="xmin"    default="-50"/> <!-- initial map min bound in x -->
+  <arg name="ymin"    default="-50"/> <!-- initial map min bound in y -->
+  <arg name="xmax"    default="50"/>  <!-- initial map max bound in x -->
+  <arg name="ymax"    default="50"/>  <!-- initial map max bound in y -->
 
   <group ns="$(arg agent)">
 
@@ -27,10 +27,10 @@
       <param name="temporalUpdate"      value="2.0"/>
       <param name="map_update_interval" value="2.0"/>
       <param name="delta"               value="$(arg map_res)"/>
-      <param name="xmin"                value="$(arg map_xmin)"/>
-      <param name="ymin"                value="$(arg map_ymin)"/>
-      <param name="xmax"                value="$(arg map_xmax)"/>
-      <param name="ymax"                value="$(arg map_ymax)"/>
+      <param name="xmin"                value="$(arg xmin)"/>
+      <param name="ymin"                value="$(arg ymin)"/>
+      <param name="xmax"                value="$(arg xmax)"/>
+      <param name="ymax"                value="$(arg ymax)"/>
     </node>
 
   </group>
