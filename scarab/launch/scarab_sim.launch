@@ -93,6 +93,7 @@
       <param name="social_margin"      value="0.2" />
       <param name="goal_tolerance_ang" value=".05"/> <!--default 2pi-->
       <param name="goal_tolerance"     value=".05"/> <!--default .2m-->
+      
     </node>
 
     <!-- slam for localization -->

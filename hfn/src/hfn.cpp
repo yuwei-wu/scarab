@@ -403,8 +403,8 @@ HFNWrapper* HFNWrapper::ROSInit(ros::NodeHandle& nh) {
   nh.param("lethal_occ_dist", p.lethal_occ_dist, 0.23);
   nh.param("cost_occ_prob", p.cost_occ_prob, 0.0);
   nh.param("cost_occ_dist", p.cost_occ_dist, 0.0);
-  nh.param("goal_tolerance", p.goal_tol, 0.2);
-  nh.param("goal_tolerance_ang", p.goal_tol_ang, M_PI * 2.0);
+  nh.param("goal_tolerance", p.goal_tol, 0.4);
+  nh.param("goal_tolerance_ang", p.goal_tol_ang, M_PI/4.0);
   nh.param("path_margin", p.path_margin, 0.5);
   nh.param("waypoint_spacing", p.waypoint_spacing, 0.05);
   nh.param("los_margin", p.los_margin, 0.2);
