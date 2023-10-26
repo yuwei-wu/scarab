@@ -27,10 +27,10 @@
       <param name="temporalUpdate"      value="2.0"/>
       <param name="map_update_interval" value="2.0"/>
       <param name="delta"               value="$(arg map_res)"/>
-      <param name="xmin"                value="$(arg xmin)"/>
-      <param name="ymin"                value="$(arg ymin)"/>
-      <param name="xmax"                value="$(arg xmax)"/>
-      <param name="ymax"                value="$(arg ymax)"/>
+      <param name="xmin"                value="$(arg map_xmin)"/>
+      <param name="ymin"                value="$(arg map_ymin)"/>
+      <param name="xmax"                value="$(arg map_xmax)"/>
+      <param name="ymax"                value="$(arg map_ymax)"/>
     </node>
 
   </group>
