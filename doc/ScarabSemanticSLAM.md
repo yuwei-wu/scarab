@@ -5,6 +5,7 @@ mkdir -p ~/ws_{your project}/src
 cd ~/ws_{your project}
 catkin init
 cd ~/ws_{your project}/src
+git clone https://github.com/catkin/catkin_simple.git 
 git clone -b scarab_exp https://github.com/tyuezhan/scarab.git
 git clone -b scarab https://github.com/tyuezhan/exploration_sem_pr.git
 git clone -b factor_graph_yuezhan_scarab https://github.com/XuRobotics/generic-sloam.git
