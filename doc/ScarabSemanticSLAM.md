@@ -14,7 +14,7 @@ git clone https://github.com/tyuezhan/kr_f250_realsense.git
 catkin build
 ```
 
-Run `roscore` and `rviz` on your laptop. Your laptop is assumed to be ROS_MASTER
+Single robot experiment, directly run everything on scarab:
 ```
 roscd exploration_manger/scripts
 ./tmux_scarab.sh
