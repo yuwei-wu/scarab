@@ -22,6 +22,7 @@ sudo apt-get install librealsense2-dkms
 sudo apt-get install librealsense2-utils
 sudo apt-get install librealsense2-dev
 sudo apt-get install librealsense2-dbg
+sudo apt-get install ros-noetic-ddynamic-reconfigure
 ```
 
 
