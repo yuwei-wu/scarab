@@ -7,6 +7,7 @@ First, setup workspace. The best way is to use Github token with HTTPS on scarab
 mkdir -p ~/ws_{your project}/src
 cd ~/ws_{your project}
 catkin init
+catkin config -DCMAKE_BUILD_TYPE=Release
 cd ~/ws_{your project}/src
 git clone https://github.com/catkin/catkin_simple.git 
 git clone -b scarab_exp https://github.com/tyuezhan/scarab.git
