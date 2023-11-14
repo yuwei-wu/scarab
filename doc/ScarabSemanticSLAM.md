@@ -4,11 +4,11 @@
 
 First, setup workspace. The best way is to use Github token with HTTPS on scarab. First make sure you have access to the following repos, and then generate your personal github token.
 ```
-mkdir -p ~/ws_{your project}/src
-cd ~/ws_{your project}
+mkdir -p ~/msslam_ws/src
+cd ~/msslam_ws
 catkin init
 catkin config -DCMAKE_BUILD_TYPE=Release
-cd ~/ws_{your project}/src
+cd ~/msslam_ws/src
 git clone https://github.com/catkin/catkin_simple.git 
 git clone -b scarab_exp https://github.com/tyuezhan/scarab.git
 git clone -b scarab https://github.com/tyuezhan/exploration_sem_pr.git
