@@ -27,7 +27,7 @@ source devel/setup.bash
 ```
 you can now launch the sim with:
 ```
-roslaunch scarab scarab_sim.launch
+roslaunch scarab gazebo.launch
 ```
 
 If you want to control scarab with keyboad, run the following from a separate terminal (don't forget to source the same setup files for this new terminal!):
