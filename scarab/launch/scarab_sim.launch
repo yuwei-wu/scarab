@@ -93,6 +93,9 @@
       <param name="social_margin"      value="0.2" />
       <param name="goal_tolerance_ang" value=".05"/> <!--default 2pi-->
       <param name="goal_tolerance"     value=".05"/> <!--default .2m-->
+      <param name="traj_mode"          value="1"/> <!--default 0 is original , 1 is constant acc, 2 is min jerk-->
+      <param name="max_speed"          value="0.3"/> <!--default 0.5m/s-->
+      <param name="max_acc"          value="0.3"/> <!--default 0.5m/s^2-->
     </node>
 
     <!-- slam for localization -->

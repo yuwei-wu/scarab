@@ -316,6 +316,8 @@ double clamp(double val, double min, double max) {
 void HumanFriendlyNav::getCommandVel(geometry_msgs::Twist *cmd_vel)
 {
   double left, right;
+
+  //std::cout << "the current twist is " << current_twist_.linear.x << " " << current_twist_.angular.z << std::endl;
   twistToWheelVel(current_twist_, left, right);
 
   double left_g, right_g;
@@ -377,6 +379,7 @@ HFNWrapper::HFNWrapper(const Params &params, HumanFriendlyNav *hfn) :
   vel_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 10);
   inflated_pub_ = nh_.advertise<sensor_msgs::LaserScan>("inflated_scan", 10, true);
   costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("costmap", 1, true);
+  traj_pub_ = nh_.advertise<visualization_msgs::Marker>("traj", 10, true);
 
   pose_sub_ = nh_.subscribe("pose", 1, &HFNWrapper::onPose, this);
   map_sub_ = nh_.subscribe("map", 1, &HFNWrapper::onMap, this);
@@ -385,8 +388,13 @@ HFNWrapper::HFNWrapper(const Params &params, HumanFriendlyNav *hfn) :
 
   map_->setThresholds(params_.free_threshold, params_.occupied_threshold);
   map_->setMapFrameID(params_.map_frame);
+  
+
+  traj_gen_.reset(new TrajectoryGenerator(1, 2));
 
   pubWaypoints();
+
+  
 }
 
 HFNWrapper::~HFNWrapper() {
@@ -419,6 +427,11 @@ HFNWrapper* HFNWrapper::ROSInit(ros::NodeHandle& nh) {
   nh.param("allow_unknown_los", p.allow_unknown_los, false);
   nh.param("map_frame_id", p.map_frame, string("/map"));
   nh.param("min_map_update", p.min_map_update, 0.0);
+  nh.param("traj_mode", p.traj_mode, 0);
+  nh.param("max_speed", p.max_speed, 0.5);
+  nh.param("max_acc", p.max_acc, 0.5);
+
+
   p.name_space = nh.getNamespace();
 
   HumanFriendlyNav *hfn = HumanFriendlyNav::ROSInit(nh);
@@ -469,15 +482,28 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
     return;
   }
 
-  // check if reached goal or stuck
   geometry_msgs::Twist cmd;
-  hfn_->getCommandVel(&cmd);
+  // check if reached goal or stuck
+  if (params_.traj_mode == 0)
+  {
+
+    hfn_->getCommandVel(&cmd);
+
+  }else if (params_.traj_mode == 1)
+  {
+    hfn_->getCommandVel(&cmd);
+    Eigen::Vector2f vel;
+    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
+    cur_traj_.getVelocity( cur_time, vel);
+
+    cmd.linear.x = std::sqrt(vel(0) *  vel(0)  + vel(1) *  vel(1));
+  }
 
   bool xy_ok = turning_ ||
     linear_distance(pose_.pose, goals_.back().pose) < params_.goal_tol;
   if (xy_ok &&
       (params_.goal_tol_ang >= M_PI ||
-       ang_distance(pose_.pose, goals_.back().pose) < params_.goal_tol_ang)) {
+      ang_distance(pose_.pose, goals_.back().pose) < params_.goal_tol_ang)) {
     stop();
     ROS_INFO("HFNWrapper: FINISHED");
     callback_(FINISHED);
@@ -485,7 +511,7 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
     bool stuck = true;
     // Check if we've moved
     for (list<geometry_msgs::PoseStamped>::iterator it = pose_history_.begin();
-         it != pose_history_.end(); ++it) {
+        it != pose_history_.end(); ++it) {
       const geometry_msgs::PoseStamped &pose = pose_history_.front();
       if (linear_distance(pose.pose, it->pose) > params_.stuck_distance ||
           ang_distance(pose.pose, it->pose) > params_.stuck_angle) {
@@ -499,6 +525,7 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
       callback_(STUCK);
     }
   }
+  
 }
 
 void HFNWrapper::onMap(const nav_msgs::OccupancyGrid &input) {
@@ -570,10 +597,65 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
   if (!initialized() || !active_) {
     return;
   }
-  bool valid_waypoint = updateWaypoint();
-  if (valid_waypoint) {
+  
+  if (params_.traj_mode == 1) {
     geometry_msgs::Twist cmd;
     hfn_->getCommandVel(&cmd);
+    Eigen::Vector2f vel, pos;
+
+    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
+    //std::cout << "the current time is " << cur_time << std::endl;
+    if (cur_time > cur_traj_.getTotalTime())
+    {
+      stop();
+      callback_(FINISHED);
+      return;
+    }
+
+
+    cur_traj_.getVelocity(cur_time, vel);
+    cur_traj_.getPosition(cur_time + 5.0, pos);
+    //std::cout << "the pos is " << pos << std::endl;
+    cmd.linear.x = std::sqrt(vel(0) *  vel(0)  + vel(1) *  vel(1));
+    
+    geometry_msgs::PoseStamped goal;
+    goal.header.stamp = ros::Time::now();
+    goal.header.frame_id = params_.map_frame;
+    goal.pose.position.x = pos(0);
+    goal.pose.position.y = pos(1);
+    goal.pose.position.z = goals_.back().pose.position.z;
+
+    //std::cout << "the velocity is " << cmd.linear.x << std::endl;
+    //std::cout << "pos is " << pos(0) << " " << pos(1) << std::endl;
+    //std::cout << " the angular velocity is " << cmd.angular.z << std::endl;
+
+    hfn_->setGoal(goal);
+
+    visualization_msgs::Marker m;
+    m.header.stamp = ros::Time();
+    m.header.frame_id = params_.map_frame;
+    m.action = visualization_msgs::Marker::ADD;
+    m.type = visualization_msgs::Marker::SPHERE;
+    m.id = 100;
+    m.ns = params_.name_space + "/waypoint";
+    m.pose.orientation.w = 1.0;
+    m.scale.x = 0.1;
+    m.scale.y = 0.1;
+    m.scale.z = 0.1;
+    m.color.a = 1.0;
+    m.color.r = 1.0;
+    m.pose.position = goal.pose.position;
+    vis_pub_.publish(m);
+
+    hfn_->getGoal(&goal);
+    m.id += 1;
+    m.header.frame_id = goal.header.frame_id;
+    m.color.r = 0.0;
+    m.color.b = 1.0;
+    m.pose = goal.pose;
+    vis_pub_.publish(m);
+
+
     if (!turning_ &&
         linear_distance(pose_.pose, goals_.back().pose) < 0.8*params_.goal_tol) {
       turning_ = 0.0 <= params_.goal_tol_ang && params_.goal_tol_ang <= M_PI;
@@ -592,16 +674,52 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
       }
       cmd.angular.z = copysign(speed, diff);
     }
+
     vel_pub_.publish(cmd);
-  } else {
-    stop();
-    callback_(UNREACHABLE);
+
   }
+  else
+  {
+    std::cout << "the traj mode is " << params_.traj_mode << std::endl;
+    bool valid_waypoint = updateWaypoint();
+    if (valid_waypoint) {
+      geometry_msgs::Twist cmd;
+      hfn_->getCommandVel(&cmd);
+      if (!turning_ &&
+          linear_distance(pose_.pose, goals_.back().pose) < 0.8*params_.goal_tol) {
+        turning_ = 0.0 <= params_.goal_tol_ang && params_.goal_tol_ang <= M_PI;
+        if (turning_) {
+          ROS_INFO("Ignoring HFN and turning instead");
+        }
+      }
+      if (turning_) {
+        cmd.linear.x = 0.0;
+        double diff =
+          angles::shortest_angular_distance(tf::getYaw(pose_.pose.orientation),
+                                            tf::getYaw(goals_.back().pose.orientation));
+        double speed = hfn_->params().w_max;
+        if (fabs(diff) < M_PI / 8.0) {
+          speed /= 1.5;
+        }
+        cmd.angular.z = copysign(speed, diff);
+      }
+
+
+
+      vel_pub_.publish(cmd);
+    } else {
+      stop();
+      callback_(UNREACHABLE);
+    }
+
+  }
+
 }
 
 void HFNWrapper::onOdom(const nav_msgs::Odometry &odom) {
   flags_.have_odom = true;
   hfn_->setOdom(odom);
+  cur_linear_vel_ = odom.twist.twist.linear.x;
 }
 
 void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
@@ -625,9 +743,13 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
     }
   }
 
-
+  // goal and p is close, do not replan
+  // if (goals_.size() > 0 &&
+  //     linear_distance(goals_.back().pose, p.back().pose) < params_.goal_tol) {
+  //   ROS_INFO("HFNWrapper: Goal is close, not replanning");
+  //   return;
+  // }
   goals_ = p;
-  waypoints_.clear();
   pose_history_.clear();
   goal_time_ = ros::Time::now();
   // If we were turning to orient towards the last goal, and we're still pretty
@@ -663,8 +785,28 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
     }
     // Plan a path to goals_ location
     geometry_msgs::Pose last_pose;
-    last_pose.position.x = path.back().x();
-    last_pose.position.y = path.back().y();
+    std::cout << "the path.back() is " << path.back()<< std::endl;
+    Eigen::Vector2f cur_pos(0, 0);
+    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
+    
+    //if the class is valid, use the cur_pos`
+    if (!cur_traj_.empty()){
+      cur_traj_.getPosition(cur_time, cur_pos);
+      std::cout << "the cur_pos is " << cur_pos(0) << " " << cur_pos(1) << std::endl;
+    }
+
+    // if the distance of cur_pos and path back is not large, use cur_pos
+    double dist = std::sqrt((cur_pos(0) - path.back()(0))*(cur_pos(0) - path.back()(0)) +
+                  (cur_pos(1) - path.back()(1))*(cur_pos(1) - path.back()(1)));
+    if (dist < 10 * params_.waypoint_spacing) {
+      last_pose.position.x = cur_pos(0);
+      last_pose.position.y = cur_pos(1);
+    } else {
+      last_pose.position.x = path.back()(0);
+      last_pose.position.y = path.back()(1);
+    }
+
+
     if (linear_distance(last_pose, it->pose) > params_.waypoint_spacing) {
       scarab::Path path_segment =
         map_->astar(last_pose.position.x, last_pose.position.y,
@@ -686,21 +828,93 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   }
 
   // Generate evenly spaced path
-  waypoints_.push_back(path[0]);
-  for (size_t i = 0; i < path.size() - 1; ++i) {
-    const Eigen::Vector2f& prev = waypoints_.back();
-    const Eigen::Vector2f& curr = path[i];
-    if ((prev - curr).norm() > params_.waypoint_spacing) {
-      waypoints_.push_back(path[i-1]);
+
+  if (params_.traj_mode == 0)
+  {
+    waypoints_.clear();
+    waypoints_.push_back(path[0]);
+
+    std::cout << "path size: " << path.size() << std::endl;
+    for (size_t i = 0; i < path.size() - 1; ++i) {
+      const Eigen::Vector2f& prev = waypoints_.back();
+      const Eigen::Vector2f& curr = path[i];
+      if ((prev - curr).norm() > params_.waypoint_spacing) {
+        waypoints_.push_back(path[i-1]);
+      }
     }
+    waypoints_.push_back(path.back());
+
+    std::cout << "waypoints size: " << waypoints_.size() << std::endl;
+    pubWaypoints();
+  }else if (params_.traj_mode == 1)
+  {
+    waypoints_.clear();
+    waypoint_times_.clear();
+    
+    waypoints_.push_back(path[0]);
+
+    std::cout << "path size: " << path.size() << std::endl;
+    for (size_t i = 0; i < path.size() - 1; ++i) {
+      const Eigen::Vector2f& prev = waypoints_.back();
+      const Eigen::Vector2f& curr = path[i];
+      if ((prev - curr).norm() > 5 * params_.waypoint_spacing) {
+        waypoints_.push_back(path[i-1]);
+      }
+    }
+    waypoints_.push_back(path.back());
+    std::cout << " waypoints_ size: " << waypoints_.size() << std::endl;
+    
+    Eigen::Vector2f start_vel(0, 0), start_acc(0, 0);
+    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
+    if(!cur_traj_.empty())
+    {
+      cur_traj_.getVelocity(cur_time, start_vel);
+      cur_traj_.getAcceleration(cur_time, start_acc);
+    }
+    //std::cout << "start vel is " << start_vel(0) << " " << start_vel(1) << std::endl;
+    //std::cout << "start acc is " << start_acc(0) << " " << start_acc(1) << std::endl;
+    gen_traj(path[0], start_vel, start_acc);
+    pubWaypoints();
+    pubTraj();
   }
-  waypoints_.push_back(path.back());
-  pubWaypoints();
 
   timeout_timer_ = nh_.createTimer(ros::Duration(params_.timeout),
                                    &HFNWrapper::timeout,
                                    this, true);
   active_ = true;
+}
+
+void HFNWrapper::gen_traj(Eigen::Vector2f &xi, 
+                          Eigen::Vector2f &vi, 
+                          Eigen::Vector2f &ai)
+{ 
+  std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f>> ic;
+  ic.push_back(vi);
+  ic.push_back(ai);
+
+  traj_gen_->setInitialConditions(xi, ic);
+  traj_gen_->addWaypoints(waypoints_);
+  
+  std::vector<float> waypoint_times;
+  waypoint_times.reserve(waypoints_.size());
+  if(waypoint_times_.size() == 0)
+  {
+    waypoint_times = traj_gen_->computeTimesTrapezoidSpeed(params_.max_speed, params_.max_acc);
+  }
+  else
+  {
+    waypoint_times.push_back(0);  // Time for the current state
+    for(const auto &t : waypoint_times_)
+      waypoint_times.push_back(t);
+  }
+
+  traj_gen_->calculate(waypoint_times);
+  float max_jerk_des = 100;
+  traj_gen_->optimizeWaypointTimes(params_.max_speed, params_.max_acc, max_jerk_des);
+  prev_traj_ = cur_traj_;
+  traj_gen_->getTrajectory(cur_traj_);
+  traj_start_time_ = ros::Time::now();
+  return;
 }
 
 void HFNWrapper::stop() {
@@ -715,7 +929,9 @@ void HFNWrapper::stop() {
   timeout_timer_.stop();
 
   waypoints_.clear();
+  waypoint_times_.clear();
   pubWaypoints();
+  traj_gen_->clearWaypoints();
 }
 
 void HFNWrapper::timeout(const ros::TimerEvent &event) {
@@ -724,6 +940,7 @@ void HFNWrapper::timeout(const ros::TimerEvent &event) {
   callback_(TIMEOUT);
 }
 
+// work for traj_mode 0
 bool HFNWrapper::updateWaypoint() {
   // Direct robot towards successor of point that it is closest to
   float min_dist = numeric_limits<float>::infinity();
@@ -810,6 +1027,48 @@ void HFNWrapper::pubWaypoints() {
   path_pub_.publish(ros_path);
 }
 
+void HFNWrapper::pubTraj()
+{
+  
+  visualization_msgs::Marker sphere, line_strip;
+  sphere.header.frame_id = line_strip.header.frame_id = params_.map_frame;
+  sphere.header.stamp = line_strip.header.stamp = ros::Time::now();
+  sphere.type = visualization_msgs::Marker::SPHERE_LIST;
+  line_strip.type = visualization_msgs::Marker::LINE_STRIP;
+  sphere.action = line_strip.action = visualization_msgs::Marker::ADD;
+  sphere.id = 0;
+  line_strip.id = 1000;
+
+  sphere.pose.orientation.w = line_strip.pose.orientation.w = 1.0;
+  sphere.color.r = line_strip.color.r = 0.0;
+  sphere.color.g = line_strip.color.g = 0.2;
+  sphere.color.b = line_strip.color.b = 0.7;
+  sphere.color.a = line_strip.color.a = 1.0;
+  sphere.scale.x = 0.1;
+  sphere.scale.y = 0.1;
+  sphere.scale.z = 0.1;
+  line_strip.scale.x = 0.05;
+  geometry_msgs::Point pt;
+  Eigen::Vector2f pos, vel;
+  double total_time = cur_traj_.getTotalTime();
+  std::cout << "total time is " << total_time << std::endl;
+  for (double t = 0; t < total_time; t += 0.5)
+  {
+    cur_traj_.getPosition(t, pos);
+    pt.x = pos(0);
+    pt.y = pos(1);
+    pt.z = 0.1;
+    //cur_traj_.getVelocity(t, vel);
+    
+    //std::cout << "the vel is " << pos.transpose()<< std::endl;
+    sphere.points.push_back(pt);
+    line_strip.points.push_back(pt);
+  }
+
+  traj_pub_.publish(sphere);
+  traj_pub_.publish(line_strip);
+
+}
 //=============================== MoveServer ================================//
 
 MoveServer::MoveServer(const string &server_name, HFNWrapper *wrapper) :
