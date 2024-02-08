@@ -38,7 +38,12 @@ public:
   bool getAcceleration(const float time, Vec2f &acc) const;
   float getTotalTime() const;
   int getIndex(const float time) const;
-
+  int getPieceNum() const { return coefficients_.size(); }
+  double getPieceTime(int i) const { return waypoint_times_[i+1] - waypoint_times_[i]; }
+  Eigen::MatrixX2f getCoeffs(int i) const { return coefficients_[i]; }
+  // coefficients is a vector of 2x6 matrices
+  // [a, b, c, d, e, f]
+  // a + b * t + c * t^2 + d * t^3 + e * t^4 + f * t^5
 };
 
 
