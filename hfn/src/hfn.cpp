@@ -506,6 +506,7 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
       ang_distance(pose_.pose, goals_.back().pose) < params_.goal_tol_ang)) {
     stop();
     ROS_INFO("HFNWrapper: FINISHED");
+    cur_traj_.clear();
     callback_(FINISHED);
   } else if ((ros::Time::now() - goal_time_).toSec() > params_.stuck_start) {
     bool stuck = true;
@@ -598,121 +599,95 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     return;
   }
   
+  geometry_msgs::Twist cmd;
   if (params_.traj_mode == 1) {
-    geometry_msgs::Twist cmd;
     hfn_->getCommandVel(&cmd);
     Eigen::Vector2f vel, pos;
 
+    //params_.tau_2
+
+    //to check if it's making turns
     double cur_time = (ros::Time::now() - traj_start_time_).toSec();
     //std::cout << "the current time is " << cur_time << std::endl;
     if (cur_time > cur_traj_.getTotalTime())
     {
       stop();
+      cur_traj_.clear();
       callback_(FINISHED);
       return;
     }
+    
 
+    // odom and current position
+    cur_traj_.getPosition(cur_time, pos);
+    // std::cout << "the pos is " << pos << std::endl;
+    // std::cout << "the cur_pos is " << cur_pos_ << std::endl;
+    // std::cout << "the distance is " << (cur_pos_ -  pos).norm() << std::endl;
+    // check velocity
 
     cur_traj_.getVelocity(cur_time, vel);
-    cur_traj_.getPosition(cur_time + 5.0, pos);
+    cur_traj_.getPosition(cur_time + 2.5, pos);
     //std::cout << "the pos is " << pos << std::endl;
-    cmd.linear.x = std::sqrt(vel(0) *  vel(0)  + vel(1) *  vel(1));
-    
+    // std::cout << "vel is " << vel(0) << " " << vel(1) << std::endl;
+    // std::cout << "the velocity is " << cmd.linear.x << std::endl;
+    // std::cout << "!!!!!!!!!!!!!!!pos is " << pos(0) << " " << pos(1) << std::endl;
+    // std::cout << " the angular velocity is " << cmd.angular.z << std::endl;
+  
+    //if vel is nan, then stop
+    if (std::isnan(vel(0)) || std::isnan(vel(1)))
+    {
+      stop();
+      cur_traj_.clear();
+      callback_(FINISHED);
+      return;
+    }
+    pubGoal(pos);
     geometry_msgs::PoseStamped goal;
-    goal.header.stamp = ros::Time::now();
-    goal.header.frame_id = params_.map_frame;
-    goal.pose.position.x = pos(0);
-    goal.pose.position.y = pos(1);
-    goal.pose.position.z = goals_.back().pose.position.z;
-
-    //std::cout << "the velocity is " << cmd.linear.x << std::endl;
-    //std::cout << "pos is " << pos(0) << " " << pos(1) << std::endl;
-    //std::cout << " the angular velocity is " << cmd.angular.z << std::endl;
-
-    hfn_->setGoal(goal);
-
-    visualization_msgs::Marker m;
-    m.header.stamp = ros::Time();
-    m.header.frame_id = params_.map_frame;
-    m.action = visualization_msgs::Marker::ADD;
-    m.type = visualization_msgs::Marker::SPHERE;
-    m.id = 100;
-    m.ns = params_.name_space + "/waypoint";
-    m.pose.orientation.w = 1.0;
-    m.scale.x = 0.1;
-    m.scale.y = 0.1;
-    m.scale.z = 0.1;
-    m.color.a = 1.0;
-    m.color.r = 1.0;
-    m.pose.position = goal.pose.position;
-    vis_pub_.publish(m);
-
     hfn_->getGoal(&goal);
-    m.id += 1;
-    m.header.frame_id = goal.header.frame_id;
-    m.color.r = 0.0;
-    m.color.b = 1.0;
-    m.pose = goal.pose;
-    vis_pub_.publish(m);
 
-
-    if (!turning_ &&
-        linear_distance(pose_.pose, goals_.back().pose) < 0.8*params_.goal_tol) {
-      turning_ = 0.0 <= params_.goal_tol_ang && params_.goal_tol_ang <= M_PI;
-      if (turning_) {
-        ROS_INFO("Ignoring HFN and turning instead");
-      }
+    Eigen::Vector2f goal_pos(goal.pose.position.x, goal.pose.position.y);
+    if ((pos -  goal_pos).norm() < 1.0)
+    {
+      //traj_start_time_ = ros::Time::now();
+      cmd.linear.x = std::sqrt(vel(0) *  vel(0)  + vel(1) *  vel(1));
     }
-    if (turning_) {
-      cmd.linear.x = 0.0;
-      double diff =
-        angles::shortest_angular_distance(tf::getYaw(pose_.pose.orientation),
-                                          tf::getYaw(goals_.back().pose.orientation));
-      double speed = hfn_->params().w_max;
-      if (fabs(diff) < M_PI / 8.0) {
-        speed /= 1.5;
-      }
-      cmd.angular.z = copysign(speed, diff);
-    }
-
-    vel_pub_.publish(cmd);
 
   }
-  else
-  {
-    std::cout << "the traj mode is " << params_.traj_mode << std::endl;
+  else{
+    //std::cout << "the traj mode is " << params_.traj_mode << std::endl;
     bool valid_waypoint = updateWaypoint();
-    if (valid_waypoint) {
-      geometry_msgs::Twist cmd;
-      hfn_->getCommandVel(&cmd);
-      if (!turning_ &&
-          linear_distance(pose_.pose, goals_.back().pose) < 0.8*params_.goal_tol) {
-        turning_ = 0.0 <= params_.goal_tol_ang && params_.goal_tol_ang <= M_PI;
-        if (turning_) {
-          ROS_INFO("Ignoring HFN and turning instead");
-        }
-      }
-      if (turning_) {
-        cmd.linear.x = 0.0;
-        double diff =
-          angles::shortest_angular_distance(tf::getYaw(pose_.pose.orientation),
-                                            tf::getYaw(goals_.back().pose.orientation));
-        double speed = hfn_->params().w_max;
-        if (fabs(diff) < M_PI / 8.0) {
-          speed /= 1.5;
-        }
-        cmd.angular.z = copysign(speed, diff);
-      }
 
-
-
-      vel_pub_.publish(cmd);
-    } else {
+    if (!valid_waypoint) {
       stop();
       callback_(UNREACHABLE);
+      return;
     }
 
+    hfn_->getCommandVel(&cmd);
   }
+
+
+  // check if enabling turning
+  if (!turning_ &&
+      linear_distance(pose_.pose, goals_.back().pose) < 0.8*params_.goal_tol) {
+    turning_ = 0.0 <= params_.goal_tol_ang && params_.goal_tol_ang <= M_PI;
+    if (turning_) {
+      ROS_INFO("Ignoring HFN and turning instead");
+    }
+  }
+  if (turning_) {
+    cmd.linear.x = 0.0;
+    double diff =
+      angles::shortest_angular_distance(tf::getYaw(pose_.pose.orientation),
+                                        tf::getYaw(goals_.back().pose.orientation));
+    double speed = hfn_->params().w_max;
+    if (fabs(diff) < M_PI / 8.0) {
+      speed /= 1.5;
+    }
+    cmd.angular.z = copysign(speed, diff);
+  }
+
+  vel_pub_.publish(cmd);
 
 }
 
@@ -720,12 +695,14 @@ void HFNWrapper::onOdom(const nav_msgs::Odometry &odom) {
   flags_.have_odom = true;
   hfn_->setOdom(odom);
   cur_linear_vel_ = odom.twist.twist.linear.x;
+  cur_pos_(0) = odom.pose.pose.position.x;
+  cur_pos_(1) = odom.pose.pose.position.y;
 }
 
 void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   ROS_INFO("HFNWrapper: Got final goal: (%.2f, %.2f, %.2f)",
            p.back().pose.position.x, p.back().pose.position.y, p.back().pose.position.z);
-
+  
   if (!initialized()) {
     ROS_WARN("HFNWrapper: NOTREADY (Haven't received: %s)",
              uninitializedString().c_str());
@@ -853,17 +830,18 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
     
     waypoints_.push_back(path[0]);
 
-    std::cout << "path size: " << path.size() << std::endl;
-    for (size_t i = 0; i < path.size() - 1; ++i) {
+    for (size_t i = 1; i < path.size() -1 ; ++i) {
       const Eigen::Vector2f& prev = waypoints_.back();
       const Eigen::Vector2f& curr = path[i];
       if ((prev - curr).norm() > 5 * params_.waypoint_spacing) {
-        waypoints_.push_back(path[i-1]);
+        //std::cout << "path[" << i << "]: " << path[i] << std::endl;
+        waypoints_.push_back(path[i]);
       }
     }
     waypoints_.push_back(path.back());
-    std::cout << " waypoints_ size: " << waypoints_.size() << std::endl;
+    //std::cout << " waypoints_ size: " << waypoints_.size() << std::endl;
     
+
     Eigen::Vector2f start_vel(0, 0), start_acc(0, 0);
     double cur_time = (ros::Time::now() - traj_start_time_).toSec();
     if(!cur_traj_.empty())
@@ -871,8 +849,8 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
       cur_traj_.getVelocity(cur_time, start_vel);
       cur_traj_.getAcceleration(cur_time, start_acc);
     }
-    //std::cout << "start vel is " << start_vel(0) << " " << start_vel(1) << std::endl;
-    //std::cout << "start acc is " << start_acc(0) << " " << start_acc(1) << std::endl;
+    std::cout << "start vel is " << start_vel(0) << " " << start_vel(1) << std::endl;
+    std::cout << "start acc is " << start_acc(0) << " " << start_acc(1) << std::endl;
     gen_traj(path[0], start_vel, start_acc);
     pubWaypoints();
     pubTraj();
@@ -891,7 +869,7 @@ void HFNWrapper::gen_traj(Eigen::Vector2f &xi,
   std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f>> ic;
   ic.push_back(vi);
   ic.push_back(ai);
-
+  traj_gen_->clearWaypoints();
   traj_gen_->setInitialConditions(xi, ic);
   traj_gen_->addWaypoints(waypoints_);
   
@@ -910,9 +888,13 @@ void HFNWrapper::gen_traj(Eigen::Vector2f &xi,
 
   traj_gen_->calculate(waypoint_times);
   float max_jerk_des = 100;
-  traj_gen_->optimizeWaypointTimes(params_.max_speed, params_.max_acc, max_jerk_des);
   prev_traj_ = cur_traj_;
-  traj_gen_->getTrajectory(cur_traj_);
+
+  Trajectory traj  = traj_gen_->optimizeWaypointTimes(params_.max_speed, params_.max_acc, max_jerk_des);
+
+  std::cout << "the traj.empty() size is " << traj.empty() << std::endl;
+
+  cur_traj_ = traj;
   traj_start_time_ = ros::Time::now();
   return;
 }
@@ -973,41 +955,52 @@ bool HFNWrapper::updateWaypoint() {
       ++ind_delta;
     }
 
-
-    geometry_msgs::PoseStamped goal;
-    goal.header.stamp = ros::Time::now();
-    goal.header.frame_id = params_.map_frame;
-    goal.pose.position.x = waypoints_[min_ind].x();
-    goal.pose.position.y = waypoints_[min_ind].y();
-    goal.pose.position.z = goals_.back().pose.position.z;
-
-    hfn_->setGoal(goal);
-
-    visualization_msgs::Marker m;
-    m.header.stamp = ros::Time();
-    m.header.frame_id = params_.map_frame;
-    m.action = visualization_msgs::Marker::ADD;
-    m.type = visualization_msgs::Marker::SPHERE;
-    m.id = 100;
-    m.ns = params_.name_space + "/waypoint";
-    m.pose.orientation.w = 1.0;
-    m.scale.x = 0.1;
-    m.scale.y = 0.1;
-    m.scale.z = 0.1;
-    m.color.a = 1.0;
-    m.color.r = 1.0;
-    m.pose.position = goal.pose.position;
-    vis_pub_.publish(m);
-
-    hfn_->getGoal(&goal);
-    m.id += 1;
-    m.header.frame_id = goal.header.frame_id;
-    m.color.r = 0.0;
-    m.color.b = 1.0;
-    m.pose = goal.pose;
-    vis_pub_.publish(m);
+    Eigen::Vector2f pos;
+    pos(0) =  waypoints_[min_ind].x();
+    pos(1) =  waypoints_[min_ind].y();
+    pubGoal(pos);
     return true;
+
   }
+}
+
+
+void HFNWrapper::pubGoal(Eigen::Vector2f &pos)
+{
+
+  geometry_msgs::PoseStamped goal;
+  goal.header.stamp = ros::Time::now();
+  goal.header.frame_id = params_.map_frame;
+  goal.pose.position.x = pos(0);
+  goal.pose.position.y = pos(1);
+  goal.pose.position.z = goals_.back().pose.position.z;
+
+  hfn_->setGoal(goal);
+
+  visualization_msgs::Marker m;
+  m.header.stamp = ros::Time();
+  m.header.frame_id = params_.map_frame;
+  m.action = visualization_msgs::Marker::ADD;
+  m.type = visualization_msgs::Marker::SPHERE;
+  m.id = 100;
+  m.ns = params_.name_space + "/waypoint";
+  m.pose.orientation.w = 1.0;
+  m.scale.x = 0.1;
+  m.scale.y = 0.1;
+  m.scale.z = 0.1;
+  m.color.a = 1.0;
+  m.color.r = 1.0;
+  m.pose.position = goal.pose.position;
+  vis_pub_.publish(m);
+
+  hfn_->getGoal(&goal);
+  m.id += 1;
+  m.header.frame_id = goal.header.frame_id;
+  m.color.r = 0.0;
+  m.color.b = 1.0;
+  m.pose = goal.pose;
+  vis_pub_.publish(m);
+  return;
 }
 
 void HFNWrapper::pubWaypoints() {
@@ -1051,7 +1044,6 @@ void HFNWrapper::pubTraj()
   geometry_msgs::Point pt;
   Eigen::Vector2f pos, vel;
   double total_time = cur_traj_.getTotalTime();
-  std::cout << "total time is " << total_time << std::endl;
   for (double t = 0; t < total_time; t += 0.5)
   {
     cur_traj_.getPosition(t, pos);
@@ -1060,7 +1052,7 @@ void HFNWrapper::pubTraj()
     pt.z = 0.1;
     //cur_traj_.getVelocity(t, vel);
     
-    //std::cout << "the vel is " << pos.transpose()<< std::endl;
+    //std::cout << "the pos is " << pos.transpose()<< std::endl;
     sphere.points.push_back(pt);
     line_strip.points.push_back(pt);
   }

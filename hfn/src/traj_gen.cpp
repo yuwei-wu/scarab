@@ -50,7 +50,7 @@ std::vector<float> TrajectoryGenerator::computeTimesTrapezoidSpeed(float v_des, 
 
   const int initial_vel_sign = (initial_vel_.dot(waypoints_[1] - waypoints_[0]) >= 0) ? 1 : -1;
   const float v_initial = initial_vel_sign * initial_vel_.norm();
-
+  
   std::vector<float> accumulated_dist;
   accumulated_dist.reserve(waypoints_.size());
   accumulated_dist.push_back(0);
@@ -255,12 +255,12 @@ bool TrajectoryGenerator::calculate(const std::vector<float> &waypoint_times)
     D.bottomRows(num_free_derivatives) = Dp;
   }
   Eigen::MatrixX2f d = M * D;
-  // std::cout << "d:\n" << d << std::endl;
+  //std::cout << "d:\n" << d << std::endl;
   coefficients_.clear();
   for(unsigned int i = 0; i < num_segments; i++)
   {
     const Eigen::MatrixX2f p = A.block(i * N_, i * N_, N_, N_).partialPivLu().solve(d.block(i * N_, 0, N_, 2));
-    // std::cout << "p:\n" << p << std::endl;
+    //std::cout << "p:\n" << p << std::endl;
     coefficients_.push_back(p);
   }
   waypoint_times_ = waypoint_times;
@@ -312,7 +312,7 @@ void TrajectoryGenerator::calcMaxPerSegment(std::vector<float> &max_vel, std::ve
   return;
 }
 
-void TrajectoryGenerator::optimizeWaypointTimes(const float max_vel, const float max_acc, const float max_jrk)
+Trajectory TrajectoryGenerator::optimizeWaypointTimes(const float max_vel, const float max_acc, const float max_jrk)
 {
   std::vector<float> segment_times;
   for(unsigned int i = 0; i < waypoint_times_.size() - 1; ++i)
@@ -374,7 +374,20 @@ void TrajectoryGenerator::optimizeWaypointTimes(const float max_vel, const float
     }
   }
 
-  trajectory_ = Trajectory(coefficients_, waypoint_times_);
+  // std::cout << " coefficients_.size() " << coefficients_.size() << std::endl;
+  // std::cout << " waypoint_times_.size() " << waypoint_times_.size() << std::endl;
+
+  // //print coefficients and waypoint_times
+  // for (int i = 0; i < coefficients_.size(); i++)
+  // {
+  //   std::cout << "coefficients_[" << i << "]: " << coefficients_[i] << std::endl;
+  // }
+  // for (int i = 0; i < waypoint_times_.size(); i++)
+  // {
+  //   std::cout << "waypoint_times_[" << i << "]: " << waypoint_times_[i] << std::endl;
+  // }
+
+  return Trajectory(coefficients_, waypoint_times_);
 }
 
 
@@ -420,7 +433,11 @@ bool Trajectory::getPosition(const float time, Vec2f &pos) const
   }
   int cur_idx = getIndex(time);
   if (cur_idx == -1)
+  {
+    std::cout << "time: " << time << " is out of range" << std::endl;
     return false;
+  }
+    
   const float t_traj = time - waypoint_times_[cur_idx];
   const Eigen::MatrixX2f &p = coefficients_[cur_idx];
   pos = Vec2f::Zero();

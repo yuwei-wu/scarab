@@ -19,14 +19,19 @@ private:
 public:
 
   Trajectory() {}
-  Trajectory(std::vector<Eigen::MatrixX2f, Eigen::aligned_allocator<Eigen::MatrixX2f>> &coefficients, std::vector<float> &waypoint_times)
+  Trajectory(std::vector<Eigen::MatrixX2f, Eigen::aligned_allocator<Eigen::MatrixX2f>> coefficients, 
+             std::vector<float> waypoint_times)
   {
+
     coefficients_ = coefficients;
     waypoint_times_ = waypoint_times;
   }
   ~Trajectory() {}
 
-  bool empty() const { return coefficients_.empty(); }
+  bool empty() const {
+    return coefficients_.size() <=0  || waypoint_times_.size() <=0;
+  }
+  void clear() { coefficients_.clear(); waypoint_times_.clear(); }
   bool getCommand(const float time, Vec2f &pos, Vec2f &vel, Vec2f &acc, Vec2f &jrk) const;
   bool getPosition(const float time, Vec2f &pos) const;
   bool getVelocity(const float time, Vec2f &vel) const;
@@ -62,14 +67,9 @@ class TrajectoryGenerator
 
   void calcMaxPerSegment(std::vector<float> &max_vel, std::vector<float> &max_acc, std::vector<float> &max_jrk) const;
 
-  void optimizeWaypointTimes(const float max_vel, const float max_acc, const float max_jrk);
+  Trajectory optimizeWaypointTimes(const float max_vel, const float max_acc, const float max_jrk);
 
   const std::vector<float> &getWaypointTimes() const;
-  bool hasOptTraj(const float time) const;
-  void getTrajectory(Trajectory &trajectory) 
-  {
-    trajectory = trajectory_;
-  }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -79,6 +79,4 @@ class TrajectoryGenerator
   vec_Vec2f waypoints_, initial_derivatives_;
   std::vector<Eigen::MatrixX2f, Eigen::aligned_allocator<Eigen::MatrixX2f>> coefficients_;
   std::vector<float> waypoint_times_;
-
-  Trajectory trajectory_;
 };
