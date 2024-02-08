@@ -78,7 +78,7 @@
       <param name="cost_occ_dist" value="0.0" />
       <param name="max_occ_dist" value="1.0" />
       <param name="lethal_occ_dist" value="0.2" />
-
+      <param name="traj_mode"          value="0"/> <!--default 0 is original-->
       <remap from="map" to="/map" />
       <remap from="odom" to="odom_motor" />
     </node>

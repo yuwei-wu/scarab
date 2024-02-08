@@ -40,7 +40,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${CGAL
 add_library(playermap src/map.c src/rosmap.cpp)
 target_link_libraries(playermap ${catkin_LIBRARIES})
 
-add_library(hfnlib src/hfn.cpp)
+add_library(hfnlib src/hfn.cpp src/traj_gen.cpp)
 target_link_libraries(hfnlib playermap ${catkin_LIBRARIES} ${CGAL_LIBRARY} ${GMP_LIBRARIES})
 add_dependencies(hfnlib ${${PROJECT_NAME}_EXPORTED_TARGETS})
 

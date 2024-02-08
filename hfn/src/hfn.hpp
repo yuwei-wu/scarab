@@ -18,6 +18,8 @@
 
 #include <hfn/rosmap.hpp>
 
+#include <hfn/traj_gen.h>
+
 namespace scarab {
 
 class HumanFriendlyNav {
@@ -115,6 +117,10 @@ public:
     double min_map_update;   // Wait at least this time before updating map
     std::string map_frame;
     std::string name_space;
+    //@yuwei: add polynomial trajectory
+    int traj_mode;
+    double max_speed, max_acc;
+
   };
 
   enum Status {
@@ -145,6 +151,7 @@ private:
   // Return true if we can follow a waypoint, false otherwise
   bool updateWaypoint();
   void pubWaypoints();
+  void pubTraj();
   void pubPolygon(const HumanFriendlyNav::Polygon_2 &polygon);
   bool initialized() {
     return flags_.have_pose && flags_.have_odom && flags_.have_map &&
@@ -153,8 +160,20 @@ private:
   // Get string describing which things have not been initialized yet
   std::string uninitializedString();
 
+  //@yuwei: add for polynomials
+  std::unique_ptr<TrajectoryGenerator> traj_gen_;
+  ros::Time traj_start_time_;
+  double cur_linear_vel_;
+  Eigen::Vector2f cur_pos_;
+  Trajectory prev_traj_, cur_traj_;
+
+  void gen_traj(Eigen::Vector2f &xi, 
+                Eigen::Vector2f &vi, 
+                Eigen::Vector2f &ai);
+  void pubGoal(Eigen::Vector2f &pos);
+
   ros::NodeHandle nh_;
-  ros::Publisher path_pub_, vis_pub_, vel_pub_, inflated_pub_, costmap_pub_;
+  ros::Publisher path_pub_, vis_pub_, vel_pub_, inflated_pub_, costmap_pub_, traj_pub_;
   ros::Subscriber pose_sub_, map_sub_, odom_sub_, laser_sub_;
 
   boost::function<void(Status)> callback_;
@@ -164,6 +183,7 @@ private:
   std::vector<geometry_msgs::PoseStamped> goals_;
   std::list<geometry_msgs::PoseStamped> pose_history_;
   scarab::Path waypoints_;
+  std::vector<double> waypoint_times_;
   boost::scoped_ptr<scarab::OccupancyMap> map_;
   Params params_;
   HumanFriendlyNav *hfn_;
