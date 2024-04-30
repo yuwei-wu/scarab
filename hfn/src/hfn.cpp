@@ -3,6 +3,7 @@
 #include <tf/tf.h>
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
+#include <kr_traj_msgs/PolyTrajByCoeffs.h>
 
 #include <boost/thread/thread.hpp>
 
@@ -380,6 +381,8 @@ HFNWrapper::HFNWrapper(const Params &params, HumanFriendlyNav *hfn) :
   inflated_pub_ = nh_.advertise<sensor_msgs::LaserScan>("inflated_scan", 10, true);
   costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("costmap", 1, true);
   traj_pub_ = nh_.advertise<visualization_msgs::Marker>("traj", 10, true);
+  poly_pub_ = nh_.advertise<kr_traj_msgs::PolyTrajByCoeffs>("poly_traj_by_coeffs", 10, true);
+
 
   pose_sub_ = nh_.subscribe("pose", 1, &HFNWrapper::onPose, this);
   map_sub_ = nh_.subscribe("map", 1, &HFNWrapper::onMap, this);
@@ -430,6 +433,7 @@ HFNWrapper* HFNWrapper::ROSInit(ros::NodeHandle& nh) {
   nh.param("traj_mode", p.traj_mode, 0);
   nh.param("max_speed", p.max_speed, 0.5);
   nh.param("max_acc", p.max_acc, 0.5);
+  nh.param("agent", p.agent, string("scarab"));
 
 
   p.name_space = nh.getNamespace();
@@ -626,7 +630,7 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     // check velocity
 
     cur_traj_.getVelocity(cur_time, vel);
-    cur_traj_.getPosition(cur_time + 2.5, pos);
+    cur_traj_.getPosition(cur_time + 4, pos);
     //std::cout << "the pos is " << pos << std::endl;
     // std::cout << "vel is " << vel(0) << " " << vel(1) << std::endl;
     // std::cout << "the velocity is " << cmd.linear.x << std::endl;
@@ -1060,7 +1064,52 @@ void HFNWrapper::pubTraj()
   traj_pub_.publish(sphere);
   traj_pub_.publish(line_strip);
 
+
+  static int traj_id = 0;
+
+  //publish the poly trajectory by coefficients
+
+  /// agent is defined as scarabxx, and we want the xx number as int
+  std::string agent = params_.agent;
+  int agent_num = std::stoi(agent.substr(6, 2));
+
+
+  kr_traj_msgs::PolyTrajByCoeffs poly_traj;
+  poly_traj.start_time = traj_start_time_;
+  poly_traj.agent_id   = agent_num;
+  poly_traj.traj_id    = traj_id;
+  poly_traj.order      = 3;
+  poly_traj.dim        = 2;
+
+  int piece_num = cur_traj_.getPieceNum();
+
+  poly_traj.coeff_x.resize(piece_num * 4);
+  poly_traj.coeff_y.resize(piece_num * 4);
+  poly_traj.duration.resize(piece_num);
+
+  for (int i = 0; i < piece_num; ++i)
+  {
+    Eigen::MatrixX2f coeff = cur_traj_.getCoeffs(i);
+    for (int j = 0; j < 4; ++j)
+    {
+      poly_traj.coeff_x[i * 4 + j] = coeff(0, j);
+      poly_traj.coeff_y[i * 4 + j] = coeff(1, j);
+    }
+    //std::cout << "the duration is " << cur_traj_.getPieceTime(i) << std::endl;
+    poly_traj.duration[i] = cur_traj_.getPieceTime(i);
+  }
+
+
+  poly_pub_.publish(poly_traj);
+
+
+  traj_id++;
+
 }
+
+
+
+
 //=============================== MoveServer ================================//
 
 MoveServer::MoveServer(const string &server_name, HFNWrapper *wrapper) :

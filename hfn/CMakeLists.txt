@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   angles
   scarab_msgs
+  kr_traj_msgs
 )
 
 generate_dynamic_reconfigure_options(cfg/HumanFriendlyNavigation.cfg)

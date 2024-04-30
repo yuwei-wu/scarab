@@ -17,7 +17,6 @@
 #include <scarab_msgs/MoveAction.h>
 
 #include <hfn/rosmap.hpp>
-
 #include <hfn/traj_gen.h>
 
 namespace scarab {
@@ -120,6 +119,7 @@ public:
     //@yuwei: add polynomial trajectory
     int traj_mode;
     double max_speed, max_acc;
+    std::string agent;
 
   };
 
@@ -173,7 +173,7 @@ private:
   void pubGoal(Eigen::Vector2f &pos);
 
   ros::NodeHandle nh_;
-  ros::Publisher path_pub_, vis_pub_, vel_pub_, inflated_pub_, costmap_pub_, traj_pub_;
+  ros::Publisher path_pub_, vis_pub_, vel_pub_, inflated_pub_, costmap_pub_, traj_pub_, poly_pub_;
   ros::Subscriber pose_sub_, map_sub_, odom_sub_, laser_sub_;
 
   boost::function<void(Status)> callback_;

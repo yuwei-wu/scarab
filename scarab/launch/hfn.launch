@@ -28,8 +28,9 @@
     <remap from="pose" to="$(arg pose_topic)" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)" />
     <param name="traj_mode"          value="1"/> <!--default 0 is original , 1 is constant acc, 2 is min jerk-->
-    <param name="max_speed"          value="0.25"/> <!--default 0.5m/s-->
-    <param name="max_acc"          value="0.3"/> <!--default 0.5m/s^2-->
+    <param name="max_speed"          value="0.22"/> <!--default 0.5m/s-->
+    <param name="max_acc"            value="0.3"/> <!--default 0.5m/s^2-->
+    <param name="agent"              value="$(arg agent)"/>
   </node>
 
 </launch>
