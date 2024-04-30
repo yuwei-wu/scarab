@@ -163,14 +163,20 @@ private:
   //@yuwei: add for polynomials
   std::unique_ptr<TrajectoryGenerator> traj_gen_;
   ros::Time traj_start_time_;
+  ros::Time send_traj_start_time;
   double cur_linear_vel_;
   Eigen::Vector2f cur_pos_;
   Trajectory prev_traj_, cur_traj_;
+  bool ifSetGoal = false;
+  bool ifMovingBack = false;
+  geometry_msgs::PoseStamped start;
+  geometry_msgs::PoseStamped oneGoal;
 
   void gen_traj(Eigen::Vector2f &xi, 
                 Eigen::Vector2f &vi, 
                 Eigen::Vector2f &ai);
   void pubGoal(Eigen::Vector2f &pos);
+  void move_back();
 
   ros::NodeHandle nh_;
   ros::Publisher path_pub_, vis_pub_, vel_pub_, inflated_pub_, costmap_pub_, traj_pub_, poly_pub_;
