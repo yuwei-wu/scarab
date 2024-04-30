@@ -1,3 +1,4 @@
+int16   total_agent_num
 int16   agent_id
 float32 agent_radius
 # the trajectory id, starts from "1".
