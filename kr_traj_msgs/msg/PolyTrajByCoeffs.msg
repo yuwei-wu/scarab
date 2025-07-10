@@ -1,3 +1,4 @@
+std_msgs/Header header
 int16   total_agent_num
 int16   agent_id
 float32 agent_radius
@@ -6,6 +7,7 @@ uint32 traj_id
 uint8 order # also has degree infos
 uint8 dim
 time start_time
+string name   # use for vicon system identification
 
 # the polynomial coecfficients of the trajectory.
 float64[] coeff_x

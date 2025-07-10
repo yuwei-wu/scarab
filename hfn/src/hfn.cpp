@@ -412,7 +412,11 @@ HFNWrapper* HFNWrapper::ROSInit(ros::NodeHandle& nh) {
   nh.param("max_speed", p.max_speed, 0.5);
   nh.param("max_acc", p.max_acc, 0.5);
   nh.param("agent", p.agent, string("scarab"));
-
+  nh.param("d_yaw", p.d_yaw, 0.0);
+  nh.param("agent_r", p.agent_r, 0.0);
+  nh.param("robot_id", p.robot_id, 0);
+  nh.param("min_yaw", p.min_yaw, 0.0);
+	
 
   p.name_space = nh.getNamespace();
 
@@ -482,6 +486,7 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
     if(ifMovingBack){
         cmd.linear.x = -cmd.linear.x;
     }
+    cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
   }
 
   bool xy_ok = turning_ ||
@@ -489,11 +494,18 @@ void HFNWrapper::onPose(const geometry_msgs::PoseStamped &input) {
   if (xy_ok &&
       (params_.goal_tol_ang >= M_PI ||
       ang_distance(pose_.pose, goals_.back().pose) < params_.goal_tol_ang)) {
-    stop();
-    ROS_INFO("HFNWrapper: FINISHED");
-    cur_traj_.clear();
+    //stop();
+
     //callback_(FINISHED);
-    move_back();
+    if(std::abs(cur_yaw - init_yaw) > params_.min_yaw){
+        ROS_INFO("d yaw is %f", std::abs(cur_yaw - init_yaw) );
+        cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
+    }else{
+        ROS_INFO("HFNWrapper: FINISHED");
+        stop();
+        cur_traj_.clear();
+        move_back();
+    }
     //return;
   } else if ((ros::Time::now() - goal_time_).toSec() > params_.stuck_start) {
     //bool stuck = true;
@@ -594,6 +606,7 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     if(ifMovingBack){
         cmd.linear.x = -cmd.linear.x;
     }
+    cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
 
     //params_.tau_2
 
@@ -602,13 +615,23 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     //std::cout << "the current time is " << cur_time << std::endl;
     if (cur_time > cur_traj_.getTotalTime())
     {
-      //cout << "move back at here\n";
-      stop();
-      cur_traj_.clear();
-      //callback_(FINISHED);
-      //return;
-      move_back();
-      return;
+        if(std::abs(cur_yaw - init_yaw) > params_.min_yaw){
+            ROS_INFO("d yaw is %f", std::abs(cur_yaw - init_yaw) );
+            cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
+        }else{
+            ROS_INFO("HFNWrapper: FINISHED");
+            stop();
+            cur_traj_.clear();
+            move_back();
+            return;
+        }
+//      //cout << "move back at here\n";
+//      stop();
+//      cur_traj_.clear();
+//      //callback_(FINISHED);
+//      //return;
+//      move_back();
+//      return;
     }
     
 
@@ -630,6 +653,7 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     //if vel is nan, then stop
     if (std::isnan(vel(0)) || std::isnan(vel(1)))
     {
+      ROS_WARN("vel is nan");
       stop();
       cur_traj_.clear();
       //callback_(FINISHED);
@@ -648,6 +672,7 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
       if(ifMovingBack){
           cmd.linear.x = -cmd.linear.x;
       }
+      cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
     }
 
     /// @songhao directly assign traj vel to cmd_vel_linear
@@ -655,6 +680,7 @@ void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
     if(ifMovingBack){
         cmd.linear.x = -cmd.linear.x;
     }
+    cmd.angular.z = (init_yaw - cur_yaw > 0) ? params_.d_yaw : -params_.d_yaw;
     //cout << "cmd.linear.x = " << cmd.linear.x << endl;
   }
   else{
@@ -700,6 +726,30 @@ void HFNWrapper::onOdom(const nav_msgs::Odometry &odom) {
   cur_linear_vel_ = odom.twist.twist.linear.x;
   cur_pos_(0) = odom.pose.pose.position.x;
   cur_pos_(1) = odom.pose.pose.position.y;
+  if(!ifSetGoal){
+      return;
+  }
+  if(!ifHasInitOrien) {
+      ifHasInitOrien = true;
+//      init_orient_.w() = odom.pose.pose.orientation.w;
+//      init_orient_.x() = odom.pose.pose.orientation.x;
+//      init_orient_.y() = odom.pose.pose.orientation.y;
+//      init_orient_.z() = odom.pose.pose.orientation.z;
+      double x0 = odom.pose.pose.position.x;
+      double y0 = odom.pose.pose.position.y;
+      double xg = fixGoal.pose.position.x;
+      double yg = fixGoal.pose.position.y;
+      init_yaw = atan2(yg - y0, xg - x0);
+
+  }else{
+      cur_orient_.w() = odom.pose.pose.orientation.w;
+      cur_orient_.x() = odom.pose.pose.orientation.x;
+      cur_orient_.y() = odom.pose.pose.orientation.y;
+      cur_orient_.z() = odom.pose.pose.orientation.z;
+      cur_yaw = atan2(2.0*(cur_orient_.w()*cur_orient_.z() + cur_orient_.x()*cur_orient_.y()),
+                       -1.0 + 2.0 * (cur_orient_.w() * cur_orient_.w() + cur_orient_.x() * cur_orient_.x()));
+  }
+  //ROS_INFO("init yaw = %f, cur_yaw = %f", init_yaw, cur_yaw);
 }
 
 void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
@@ -716,6 +766,7 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   if(!ifSetGoal){
       ifSetGoal = true;
       oneGoal = p[0];
+      fixGoal = oneGoal;
       start.pose.position.x = cur_pos_(0);
       start.pose.position.y = cur_pos_(1);
       start.pose.position.z = 0.0;
@@ -918,14 +969,14 @@ void HFNWrapper::gen_traj(Eigen::Vector2f &xi,
   traj_start_time_ = ros::Time::now();  //////// get sim time from 0
 
   //////// get time from system clock: for planner
-  ros::WallTime wall_time_now = ros::WallTime::now();
-  send_traj_start_time = ros::Time(wall_time_now.toSec());
+  send_traj_start_time = ros::Time(ros::WallTime::now().toSec());
 
   return;
 }
 
 void HFNWrapper::stop() {
   ROS_INFO("HFNWrapper: Stopping");
+
   active_ = false;
 
   geometry_msgs::Twist cmd_vel;
@@ -939,6 +990,7 @@ void HFNWrapper::stop() {
   waypoint_times_.clear();
   pubWaypoints();
   traj_gen_->clearWaypoints();
+  //hasGoal = false;
 }
 
 void HFNWrapper::move_back() {
@@ -1111,17 +1163,25 @@ void HFNWrapper::pubTraj()
   std::string agent = params_.agent;
   int agent_num = std::stoi(agent.substr(6, 2));
 
-    ROS_WARN("HERE1");
+
   kr_traj_msgs::PolyTrajByCoeffs poly_traj;
+  poly_traj.header.stamp      =  ros::Time(ros::WallTime::now().toSec());
+  //poly_traj.header.seq = 1;
+  //poly_traj.header.frame_id = "simulator";
+
   poly_traj.total_agent_num = 1;  ///  ......
   //poly_traj.start_time      = traj_start_time_;
   poly_traj.start_time      =   send_traj_start_time;
-  poly_traj.agent_id        = agent_num;
+  poly_traj.agent_id        = params_.robot_id;
   poly_traj.traj_id         = traj_id;
   poly_traj.order           = 3;
   poly_traj.dim             = 2;
+  poly_traj.agent_radius    = params_.agent_r;
+  poly_traj.name            = params_.agent;
+  
 
   int piece_num = cur_traj_.getPieceNum();
+  int q = 0;
   poly_traj.coeff_x.resize(piece_num * 4);
   poly_traj.coeff_y.resize(piece_num * 4);
   poly_traj.duration.resize(piece_num);
@@ -1144,7 +1204,8 @@ void HFNWrapper::pubTraj()
 
 
   traj_id++;
-
+  ROS_INFO("[scarab]: send the trajectory to vicon_map, with stamp(current time) = %f, 1st_traj_duration = %f, and frame_id = %s",
+           poly_traj.header.stamp.toSec(), poly_traj.duration[0], poly_traj.header.frame_id.c_str());
 }
 
 
