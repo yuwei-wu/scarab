@@ -9,7 +9,7 @@
   <arg name="cmd_vel_topic" default="cmd_vel"/>
   <arg name="scan_topic"    default="scan"/>
   <arg name="pose_topic"    default="pose"/>
-  <arg name="goal_topic"    default="move_base_simple/goal"/>
+  <arg name="goal_topic"    default="$(arg agent)/move_base_simple/goal"/>
 
   <arg name="map_frame"     default="$(arg agent)/map" />
   <arg name="base_frame"    default="$(arg agent)/base_link" />
@@ -40,11 +40,11 @@
       <remap from="odom" to="$(arg odom_topic)" />
     </node>
 
-    <!--
-        <node name="pose_stamped" pkg="hfn" type="tf_posestamped_node.py" >
-        <param name="base_frame_id" value="/$(arg agent)/$(arg base_frame)" />
-        <param name="map_frame_id" value="/$(arg agent)/$(arg map_frame)" />
-        </node> -->
+    
+    <node name="pose_stamped" pkg="hfn" type="tf_posestamped_node.py" >
+      <param name="base_frame_id" value="/$(arg agent)/$(arg base_frame)" />
+      <param name="map_frame_id" value="/$(arg agent)/$(arg map_frame)" />
+    </node>
 
   </group>
 
