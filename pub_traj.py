@@ -105,17 +105,22 @@ def publish_trajectory(points, robot, interval=2.0):
         pub.publish(pose)
         rate.sleep()
 
-if __name__ == "__main__":
 
-    # use relative path to the trajectory file
-    filepath = "Real_World/RM1/robot_trajectories.pkl"
-    start_time = "2025-07-11 09:11:00"  # Set your desired start time here
-    robot = "scarab40"  # Set your robot name here
+import argparse
+import rospy
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Replay robot trajectory from a specified start time.")
+    parser.add_argument("--start-time", required=True, help="Start time in format YYYY-MM-DD HH:MM:SS")
+    parser.add_argument("--robot", default="scarab40", help="Robot name (default: scarab40)")
+    parser.add_argument("--file", default="Real_World/RM1/robot_trajectories.pkl", help="Trajectory file path")
+
+    args = parser.parse_args()
 
     try:
-        traj = load_trajectory(filepath)
+        traj = load_trajectory(args.file)
         print(f"Loaded trajectory with {len(traj)} points.")
-        wait_until(start_time)
-        publish_trajectory(traj, robot=robot, interval=2.0)  # Change interval (in seconds) as needed
+        wait_until(args.start_time)
+        publish_trajectory(traj, robot=args.robot, interval=2.0)
     except rospy.ROSInterruptException:
         pass
