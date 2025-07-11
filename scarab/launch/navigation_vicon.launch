@@ -3,7 +3,7 @@
   <arg name="agent"         default="$(env AGENT)" />
   <arg name="use_vicon"     default="true"/>
 
-  <arg name="odom_topic"    default="/vicon/scarab45/odom" if="$(arg use_vicon)"/>
+  <arg name="odom_topic"    default="/vicon/$(arg agent)/odom" if="$(arg use_vicon)"/>
   <arg name="odom_topic"    default="odom_laser" unless="$(arg use_vicon)"/>
   <arg name="map_topic"     default="map"/>
   <arg name="cmd_vel_topic" default="cmd_vel"/>
@@ -17,10 +17,10 @@
 
   <!-- gmapping map args -->
   <arg name="map_res" default="0.05"/> <!-- map resolution -->
-  <arg name="map_xmin"    default="-50"/>  <!-- initial map min bound in x -->
-  <arg name="map_ymin"    default="-50"/>  <!-- initial map min bound in y -->
-  <arg name="map_xmax"    default="50"/>   <!-- initial map max bound in x -->
-  <arg name="map_ymax"    default="50"/>   <!-- initial map max bound in y -->
+  <arg name="map_xmin"    default="-10"/>  <!-- initial map min bound in x -->
+  <arg name="map_ymin"    default="-10"/>  <!-- initial map min bound in y -->
+  <arg name="map_xmax"    default="10"/>   <!-- initial map max bound in x -->
+  <arg name="map_ymax"    default="10"/>   <!-- initial map max bound in y -->
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
