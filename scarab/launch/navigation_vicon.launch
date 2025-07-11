@@ -5,11 +5,11 @@
 
   <arg name="odom_topic"    default="/vicon/$(arg agent)/odom" if="$(arg use_vicon)"/>
   <arg name="odom_topic"    default="odom_laser" unless="$(arg use_vicon)"/>
-  <arg name="map_topic"     default="${arg agent}/map"/>
-  <arg name="cmd_vel_topic" default="${arg agent}/cmd_vel"/>
-  <arg name="scan_topic"    default="${arg agent}/scan"/>
-  <arg name="pose_topic"    default="${arg agent}/pose"/>
-  <arg name="goal_topic"    default="$(arg agent)/move_base_simple/goal"/>
+  <arg name="map_topic"     default="map"/>
+  <arg name="cmd_vel_topic" default="cmd_vel"/>
+  <arg name="scan_topic"    default="scan"/>
+  <arg name="pose_topic"    default="pose"/>
+  <arg name="goal_topic"    default="move_base_simple/goal"/>
 
   <arg name="map_frame"     default="$(arg agent)/map" />
   <arg name="base_frame"    default="$(arg agent)/base_link" />
