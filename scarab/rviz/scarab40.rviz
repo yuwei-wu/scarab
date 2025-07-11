@@ -3,7 +3,8 @@ Panels:
     Help Height: 172
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Axes1
       Splitter Ratio: 0.5952380895614624
     Tree Height: 1422
   - Class: rviz/Selection
@@ -148,8 +149,7 @@ Visualization Manager:
       Marker Topic: /scarab40/marker
       Name: HFN
       Namespaces:
-        /scarab40/hfn_navigation/polygon: true
-        /scarab40/hfn_navigation/waypoint: true
+        /scarab40/hfn/polygon: true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -163,9 +163,9 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
-      Length: 1
+      Length: 5
       Name: Axes
-      Radius: 0.10000000149011612
+      Radius: 0.019999999552965164
       Reference Frame: <Fixed Frame>
       Show Trail: false
       Value: true
@@ -214,10 +214,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 93.64916229248047
+      Scale: 101.8880615234375
       Target Frame: <Fixed Frame>
-      X: 2.742169141769409
-      Y: 1.7288565635681152
+      X: 0.8283035159111023
+      Y: 0.9731242060661316
     Saved: ~
 Window Geometry:
   Displays:
