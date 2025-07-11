@@ -17,10 +17,10 @@
 
   <!-- gmapping map args -->
   <arg name="map_res" default="0.05"/> <!-- map resolution -->
-  <arg name="map_xmin"    default="-10"/>  <!-- initial map min bound in x -->
-  <arg name="map_ymin"    default="-10"/>  <!-- initial map min bound in y -->
-  <arg name="map_xmax"    default="10"/>   <!-- initial map max bound in x -->
-  <arg name="map_ymax"    default="10"/>   <!-- initial map max bound in y -->
+  <arg name="map_xmin"    default="-20"/>  <!-- initial map min bound in x -->
+  <arg name="map_ymin"    default="-20"/>  <!-- initial map min bound in y -->
+  <arg name="map_xmax"    default="20"/>   <!-- initial map max bound in x -->
+  <arg name="map_ymax"    default="20"/>   <!-- initial map max bound in y -->
 
   <!-- launch components for navigation with vicon -->
   <group if="$(arg use_vicon)" ns="$(arg agent)">
