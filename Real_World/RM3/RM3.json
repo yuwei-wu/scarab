@@ -1,0 +1,68 @@
+{
+  "robots": {
+    "number": 3,
+    "positions": [
+      {
+        "id": 0,
+        "name": "robot_0",
+        "x": -1.5,
+        "y": 3.0
+      },
+      {
+        "id": 1,
+        "name": "robot_1",
+        "x": 0.5,
+        "y": 3.0
+      },
+      {
+        "id": 2,
+        "name": "robot_2",
+        "x": 1.0,
+        "y": 8.0
+      }
+    ]
+  },
+  "dynamic_objects": {
+    "number": 0,
+    "positions": [
+    ]
+  },
+  "room_range": {
+    "x_min": -2.0,
+    "x_max": 2.0,
+    "y_min": 2.5,
+    "y_max": 9.0
+  },
+  "forbidden_regions": {
+    "forbidden_0": {
+      "name": "forbidden_0",
+      "x": 0.0,
+      "y": 5.5,
+      "shape": "grid",
+      "size": 0.5
+    }
+  },
+  "regular_regions": {
+    "region_0": {
+      "name": "region_0",
+      "x": -0.5,
+      "y": 7.0,
+      "shape": "grid",
+      "size": 1.0
+    },
+    "region_1": {
+      "name": "region_1",
+      "x": 1.0,
+      "y": 3.5,
+      "shape": "grid",
+      "size": 1.0
+    },
+    "region_2": {
+      "name": "region_2",
+      "x": -1.0,
+      "y": 4.0,
+      "shape": "grid",
+      "size": 1.0
+    }
+  }
+}

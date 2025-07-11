@@ -5,6 +5,8 @@
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
   <arg name="ns" default="scarab40" />
+  <arg name="init_x" default="0"/>
+  <arg name="init_y" default="0"/>
 
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
@@ -27,7 +29,8 @@
     <param name="tf_prefix" value="" />
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
           output="screen"
-          args="-urdf -model scarab -param /robot_description -x 0 -y 0"/>
+          args="-urdf -model scarab -param /robot_description -x $(arg init_x) -y $(arg init_y)"/>
+
     <node name="state_publisher" type="robot_state_publisher"
           pkg="robot_state_publisher" output="screen" >
       <param name="whitelist" value="base,camera,laser,hokuyo" />

@@ -76,6 +76,17 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "csetjmp": "cpp",
+        "codecvt": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "netfwd": "cpp",
+        "regex": "cpp",
+        "rope": "cpp",
+        "future": "cpp",
+        "ranges": "cpp",
+        "stop_token": "cpp",
+        "valarray": "cpp"
     }
 }

@@ -333,8 +333,7 @@ void HumanFriendlyNav::getCommandVel(geometry_msgs::Twist *cmd_vel)
 
   // Wheel vel to twist
   cmd_vel->linear.x = (right + left) / 2.0;
-  //cmd_vel->angular.z = (right -left) / params_.axle_width;
-  cmd_vel->angular.z = 0.0;
+  cmd_vel->angular.z = (right -left) / params_.axle_width;
 }
 
 

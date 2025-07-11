@@ -1,0 +1,28 @@
+{
+  "robots": {
+    "number": 1,
+    "positions": [
+      {
+        "id": 0,
+        "name": "robot_0",
+        "x": 0.0,
+        "y": 3.0
+      }
+    ]
+  },
+  "dynamic_objects": {
+    "number": 0,
+    "positions": [
+    ]
+  },
+  "room_range": {
+    "x_min": -10.0,
+    "x_max": 10.0,
+    "y_min": -10.0,
+    "y_max": 10.0
+  },
+  "forbidden_regions": {
+  },
+  "regular_regions": {
+  }
+}

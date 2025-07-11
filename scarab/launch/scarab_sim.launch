@@ -3,11 +3,13 @@
   <arg name="agent"        default="scarab40"/>  <!-- agent name, need to be the same as vicon's if using vicon -->
   <arg name="id"        default="0"/>
   <arg name="ground_truth" default="true"/> <!-- publish ground truth tf tree -->
+  <arg name="traj_mode" default="0"/> <!-- default 0 is original, 1 is constant acc, 2 is min jerk -->
 
   <!-- robot spawn args -->
   <arg name="spawn_x" default="0.0"/>
   <arg name="spawn_y" default="0.0"/>
   <arg name="spawn_z" default="1.0"/>
+  <arg name="spawn_yaw" default="0.0"/>
   <arg name="camera"  default="true"/> <!-- enable simulated kinect in gazebo -->
   <arg name="hokuyo"  default="true"/> <!-- enable simulated hokuyo in gazebo -->
 
@@ -58,7 +60,7 @@
     <!-- spawn robot in gazebo -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" output="screen"
           args="-urdf -model $(arg agent) -param /$(arg agent)/robot_description
-                -x $(arg spawn_x) -y $(arg spawn_y) -z $(arg spawn_z)"/>
+                -x $(arg spawn_x) -y $(arg spawn_y) -z $(arg spawn_z) -Y $(arg spawn_yaw)"/>
 
     <!-- publish gazebo model joint states to tf -->
     <node name="robot_state_publisher"
@@ -94,11 +96,11 @@
       <param name="social_margin"      value="0.2" />
       <param name="goal_tolerance_ang" value=".05"/> <!--default 2pi-->
       <param name="goal_tolerance"     value=".05"/> <!--default .2m-->
-      <param name="traj_mode"          value="1"/> <!--default 0 is original , 1 is constant acc, 2 is min jerk-->
-      <param name="max_speed"          value="0.22"/> <!--default 0.5m/s-->
-      <param name="max_acc"            value="0.3"/> <!--default 0.5m/s^2-->
+      <param name="traj_mode"          value="$(arg traj_mode)"/> <!--default 0 is original , 1 is constant acc, 2 is min jerk-->
+      <param name="max_speed"          value="0.5"/> <!--default 0.5m/s-->
+      <param name="max_acc"            value="0.5"/> <!--default 0.5m/s^2-->
       <param name="agent"              value="$(arg agent)"/>
-      <param name="d_yaw"              value="0.02"/>
+      <param name="d_yaw"              value="0.3"/>
       <param name="min_yaw"              value="0.001"/>
       <param name="agent_r"            value="0.2"/>
       <param name="agent_r"            value="0.2"/>

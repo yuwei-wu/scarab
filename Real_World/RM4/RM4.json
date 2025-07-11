@@ -1,0 +1,54 @@
+{
+  "robots": {
+    "number": 3,
+    "positions": [
+      {
+        "id": 0,
+        "name": "robot_0",
+        "x": -1.0,
+        "y": 3.0
+      },
+      {
+        "id": 1,
+        "name": "robot_1",
+        "x": 0.0,
+        "y": 3.0
+      },
+      {
+        "id": 2,
+        "name": "robot_2",
+        "x": 1.0,
+        "y": 3.0
+      }
+    ]
+  },
+  "dynamic_objects": {
+    "number": 1,
+    "positions": [
+      {
+        "id": 0,
+        "name": "dynamic_obj_0",
+        "x": -0.5,
+        "y": 4.5,
+        "mode": 0
+      }
+    ]
+  },
+  "room_range": {
+    "x_min": -2.0,
+    "x_max": 2.0,
+    "y_min": 2.5,
+    "y_max": 9.0
+  },
+  "forbidden_regions": {
+  },
+  "regular_regions": {
+    "region_0": {
+      "name": "region_0",
+      "x": 0.5,
+      "y": 7.0,
+      "shape": "grid",
+      "size": 1.0
+    }
+  }
+}

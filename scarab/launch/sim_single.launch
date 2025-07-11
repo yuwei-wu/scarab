@@ -1,13 +1,18 @@
 <launch>
 
   <arg name="agent"       default="scarab40"/>
+  <arg name="id"       default="0"/>
   <arg name="rviz"        default="true"/>
 
   <!-- gazebo args -->
-  <arg name="world"       default="levine"/>
+  <arg name="world"       default="perch"/>
   <arg name="verbose"     default="false"/>
   <arg name="debug"       default="false"/>
   <arg name="gazebo_gui"  default="true"/>
+
+  <arg name="init_x"      default="0"/>
+  <arg name="init_y"      default="2"/>
+  <arg name="init_yaw"    default="1.5708"/> <!-- 90 degrees in radians -->
 
   <!-- SIMULATION -->
 
@@ -28,12 +33,18 @@
   <!-- load gazebo world -->
   <node name="perch_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
         args="-sdf -model $(arg world)
-              -file $(find scarab_gazebo)/models/$(arg world)/model.sdf"/>
+              -file $(find scarab_gazebo)/models/$(arg world)/model.sdf
+              -x 0 -y -10 -z 0 -R 0 -P 0 -Y 1.5708"/>
+
 
   <!-- ROBOTS -->
 
   <include file="$(find scarab)/launch/scarab_sim.launch">
     <arg name="agent"   value="$(arg agent)"/>
+    <arg name="id"   value="$(arg id)"/>
+    <arg name="spawn_x" value="$(arg init_x)"/>
+    <arg name="spawn_y" value="$(arg init_y)"/>
+    <arg name="spawn_yaw" value="$(arg init_yaw)"/>
   </include>
 
 </launch>
