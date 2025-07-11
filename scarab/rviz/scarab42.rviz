@@ -3,7 +3,8 @@ Panels:
     Help Height: 138
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Axes1
       Splitter Ratio: 0.5952380895614624
     Tree Height: 1446
   - Class: rviz/Selection
@@ -154,9 +155,9 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
-      Length: 1
+      Length: 5
       Name: Axes
-      Radius: 0.10000000149011612
+      Radius: 0.019999999552965164
       Reference Frame: <Fixed Frame>
       Show Trail: false
       Value: true
@@ -197,7 +198,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 83.19235229492188
+      Scale: 186.09405517578125
       Target Frame: <Fixed Frame>
       X: 0
       Y: 0
