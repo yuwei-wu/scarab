@@ -28,7 +28,7 @@ stuck_distance:      0.05  # radius of neighborhood for when a robot is stuck
 stuck_angle:         0.05  # Not stuck if moved angle is larger than this
 stuck_timeout:       5.0   # time over which a robot must remain in radius
 stuck_start:         3.0   # seconds to before we start checking if we're stuck
-free_threshold:      200     # max occupancy grid value for free space
-occupied_threshold:  500   # min occupancy grid value for occupied space
+free_threshold:      100     # max occupancy grid value for free space
+occupied_threshold:  100   # min occupancy grid value for occupied space
 allow_unknown_path:  true  # allow paths through unknown space
 allow_unknown_los:   true # allow line of sight through unknown space
