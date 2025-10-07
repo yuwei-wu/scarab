@@ -74,7 +74,7 @@
     </node>
 
     <!-- human friendly navigation -->
-    <include file="$(find scarab)/launch/hfn.launch" >
+    <!-- <include file="$(find scarab)/launch/hfn.launch" >
       <arg name="agent"          value="$(arg agent)" />
       <arg name="use_vicon"      value="$(arg use_vicon)" />
       <arg name="odom_topic"     value="$(arg odom_topic)" />
@@ -84,7 +84,7 @@
       <arg name="pose_topic"     value="$(arg pose_topic)" />
       <arg name="map_frame"      value="$(arg map_frame)" />
       <arg name="base_frame"     value="$(arg base_frame)" />
-    </include>
+    </include> -->
 
     <!-- allows sending nav goals from rviz -->
     <node name="goal_to_action" pkg="hfn" type="goal_to_action.py" output="screen">
