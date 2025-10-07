@@ -594,14 +594,14 @@ Path OccupancyMap::shortestPath(double stopx, double stopy) {
 }
 
 void OccupancyMap::setThresholds(int free, int occ) {
-  if (free < 0 || free > 100) {
-    ROS_ERROR("Unoccupied space threshold must be in the range [0,100)");
-    return;
-  }
-  if (occ <= 0 || occ > 100) {
-    ROS_ERROR("Unoccupied space threshold must be in the range (0,100]");
-    return;
-  }
+  // if (free < 0 || free > 100) {
+  //   ROS_ERROR("Unoccupied space threshold must be in the range [0,100)");
+  //   return;
+  // }
+  // if (occ <= 0 || occ > 100) {
+  //   ROS_ERROR("Unoccupied space threshold must be in the range (0,100]");
+  //   return;
+  // }
   if (free >= occ) {
     ROS_ERROR("Unoccupied space threshold must be less than occupied threshold");
     return;
