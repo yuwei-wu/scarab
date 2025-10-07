@@ -799,73 +799,75 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   // passing through all intermediate points in goals_
   scarab::Path path;
   path.push_back(Eigen::Vector2f(pose_.pose.position.x, pose_.pose.position.y));
-  for (std::vector<geometry_msgs::PoseStamped>::iterator it = goals_.begin();
-       it != goals_.end(); ++it) {
-    // Check if goals_ location is reachable
-    // if (map_->getCell(it->pose.position.x, it->pose.position.y)->occ_dist <
-    //     params_.lethal_occ_dist) {
+  // for (std::vector<geometry_msgs::PoseStamped>::iterator it = goals_.begin();
+  //      it != goals_.end(); ++it) {
+  //   // Check if goals_ location is reachable
+  //   // if (map_->getCell(it->pose.position.x, it->pose.position.y)->occ_dist <
+  //   //     params_.lethal_occ_dist) {
 
-      double startx = it->pose.position.x, starty = it->pose.position.y;
-      double newx, newy;
-      // bool valid = map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
-      //                                 &newx, &newy);
-      // if (valid) {
-        ROS_WARN("HFNWrapper: Adjusted goal at %f %f", startx, starty);
-        it->pose.position.x = newx;
-        it->pose.position.y = newy;
-      // } else {
-      //   ROS_WARN("HFNWrapper: UNREACHABLE (Goal at (%f, %f) is too close to obstacle)",
-      //            it->pose.position.x, it->pose.position.y);
-      //   stop();
-      //   callback_(UNREACHABLE);
-      //   return;
-      // }
-    }
-    // Plan a path to goals_ location
-    geometry_msgs::Pose last_pose;
-    std::cout << "the path.back() is " << path.back()<< std::endl;
-    Eigen::Vector2f cur_pos(0, 0);
-    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
+  //     double startx = it->pose.position.x, starty = it->pose.position.y;
+  //     double newx, newy;
+  //     // bool valid = map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
+  //     //                                 &newx, &newy);
+  //     // if (valid) {
+  //     ROS_WARN("HFNWrapper: Adjusted goal at %f %f", startx, starty);
+  //     it->pose.position.x = newx;
+  //     it->pose.position.y = newy;
+  //     // } else {
+  //     //   ROS_WARN("HFNWrapper: UNREACHABLE (Goal at (%f, %f) is too close to obstacle)",
+  //     //            it->pose.position.x, it->pose.position.y);
+  //     //   stop();
+  //     //   callback_(UNREACHABLE);
+  //     //   return;
+  //     // }
+  //   }
+  //   // Plan a path to goals_ location
+  //   geometry_msgs::Pose last_pose;
+  //   std::cout << "the path.back() is " << path.back()<< std::endl;
+  //   Eigen::Vector2f cur_pos(0, 0);
+  //   double cur_time = (ros::Time::now() - traj_start_time_).toSec();
     
-    //if the class is valid, use the cur_pos`
-    if (!cur_traj_.empty()){
-      cur_traj_.getPosition(cur_time, cur_pos);
-      std::cout << "the cur_pos is " << cur_pos(0) << " " << cur_pos(1) << std::endl;
-    }
+  //   //if the class is valid, use the cur_pos`
+  //   if (!cur_traj_.empty()){
+  //     cur_traj_.getPosition(cur_time, cur_pos);
+  //     std::cout << "the cur_pos is " << cur_pos(0) << " " << cur_pos(1) << std::endl;
+  //   }
 
-    // if the distance of cur_pos and path back is not large, use cur_pos
-    double dist = std::sqrt((cur_pos(0) - path.back()(0))*(cur_pos(0) - path.back()(0)) +
-                  (cur_pos(1) - path.back()(1))*(cur_pos(1) - path.back()(1)));
-    if (dist < 10 * params_.waypoint_spacing) {
-      last_pose.position.x = cur_pos(0);
-      last_pose.position.y = cur_pos(1);
-    } else {
-      last_pose.position.x = path.back()(0);
-      last_pose.position.y = path.back()(1);
-    }
+  //   // if the distance of cur_pos and path back is not large, use cur_pos
+  //   double dist = std::sqrt((cur_pos(0) - path.back()(0))*(cur_pos(0) - path.back()(0)) +
+  //                 (cur_pos(1) - path.back()(1))*(cur_pos(1) - path.back()(1)));
+  //   if (dist < 10 * params_.waypoint_spacing) {
+  //     last_pose.position.x = cur_pos(0);
+  //     last_pose.position.y = cur_pos(1);
+  //   } else {
+  //     last_pose.position.x = path.back()(0);
+  //     last_pose.position.y = path.back()(1);
+  //   }
 
 
-    if (linear_distance(last_pose, it->pose) > params_.waypoint_spacing) {
-      scarab::Path path_segment =
-        map_->astar(last_pose.position.x, last_pose.position.y,
-                    it->pose.position.x, it->pose.position.y,
-                    params_.lethal_occ_dist, params_.allow_unknown_path);
-      if (path_segment.size() != 0) {
-        for (size_t i=0; i<path_segment.size(); ++i) {
-          path.push_back(path_segment[i]);
-        }
-      } else {
-        ROS_WARN("HFNWrapper: UNREACHABLE (No path found to goal)");
-        stop();
-        callback_(UNREACHABLE);
-        return;
-      }
-    } else {
-      path.push_back(Eigen::Vector2f(it->pose.position.x, it->pose.position.y));
-    }
-  }
+  //   if (linear_distance(last_pose, it->pose) > params_.waypoint_spacing) {
+  //     scarab::Path path_segment =
+  //       map_->astar(last_pose.position.x, last_pose.position.y,
+  //                   it->pose.position.x, it->pose.position.y,
+  //                   params_.lethal_occ_dist, params_.allow_unknown_path);
+  //     if (path_segment.size() != 0) {
+  //       for (size_t i=0; i<path_segment.size(); ++i) {
+  //         path.push_back(path_segment[i]);
+  //       }
+  //     } else {
+  //       ROS_WARN("HFNWrapper: UNREACHABLE (No path found to goal)");
+  //       stop();
+  //       callback_(UNREACHABLE);
+  //       return;
+  //     }
+  //   } else {
+  //     path.push_back(Eigen::Vector2f(it->pose.position.x, it->pose.position.y));
+  //   }
+  // }
 
   // Generate evenly spaced path
+
+  std::cout << " path[0] is " << path[0] << std::endl;
 
   if (params_.traj_mode == 0)
   {
