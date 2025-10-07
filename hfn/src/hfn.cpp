@@ -802,24 +802,24 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   for (std::vector<geometry_msgs::PoseStamped>::iterator it = goals_.begin();
        it != goals_.end(); ++it) {
     // Check if goals_ location is reachable
-    if (map_->getCell(it->pose.position.x, it->pose.position.y)->occ_dist <
-        params_.lethal_occ_dist) {
+    // if (map_->getCell(it->pose.position.x, it->pose.position.y)->occ_dist <
+    //     params_.lethal_occ_dist) {
 
       double startx = it->pose.position.x, starty = it->pose.position.y;
       double newx, newy;
-      bool valid = map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
-                                      &newx, &newy);
-      if (valid) {
+      // bool valid = map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
+      //                                 &newx, &newy);
+      // if (valid) {
         ROS_WARN("HFNWrapper: Adjusted goal at %f %f", startx, starty);
         it->pose.position.x = newx;
         it->pose.position.y = newy;
-      } else {
-        ROS_WARN("HFNWrapper: UNREACHABLE (Goal at (%f, %f) is too close to obstacle)",
-                 it->pose.position.x, it->pose.position.y);
-        stop();
-        callback_(UNREACHABLE);
-        return;
-      }
+      // } else {
+      //   ROS_WARN("HFNWrapper: UNREACHABLE (Goal at (%f, %f) is too close to obstacle)",
+      //            it->pose.position.x, it->pose.position.y);
+      //   stop();
+      //   callback_(UNREACHABLE);
+      //   return;
+      // }
     }
     // Plan a path to goals_ location
     geometry_msgs::Pose last_pose;
@@ -900,7 +900,7 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
       }
     }
     waypoints_.push_back(path.back());
-    //std::cout << " waypoints_ size: " << waypoints_.size() << std::endl;
+    std::cout << " waypoints_ size: " << waypoints_.size() << std::endl;
     
 
     Eigen::Vector2f start_vel(0, 0), start_acc(0, 0);
@@ -947,13 +947,19 @@ void HFNWrapper::gen_traj(Eigen::Vector2f &xi,
   waypoint_times.reserve(waypoints_.size());
   if(waypoint_times_.size() == 0)
   {
+    std::cout << "compute time using trapezoid speed" << std::endl;
     waypoint_times = traj_gen_->computeTimesTrapezoidSpeed(params_.max_speed, params_.max_acc);
   }
   else
   {
+
+    std::cout << "use given time" << std::endl;
     waypoint_times.push_back(0);  // Time for the current state
     for(const auto &t : waypoint_times_)
+    {
       waypoint_times.push_back(t);
+      std::cout << t << " ";
+    }
   }
 
   traj_gen_->calculate(waypoint_times);
