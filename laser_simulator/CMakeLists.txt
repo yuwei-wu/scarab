@@ -9,6 +9,7 @@ add_message_files(FILES ScanPair.msg PoseStampedNamed.msg PoseStampedNamedArray.
 
 generate_messages(DEPENDENCIES nav_msgs sensor_msgs geometry_msgs)
 
+find_package(Boost REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(CGAL REQUIRED)
 find_package(LAPACK REQUIRED)
@@ -18,7 +19,7 @@ catkin_package(INCLUDE_DIRS include
    CATKIN_DEPENDS roscpp nav_msgs sensor_msgs geometry_msgs rosbag tf
    message_runtime)
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS}
+include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS}
   ${CGAL_INCLUDE_DIRS})
 
 add_library(laser_simlib src/LaserSimulator.cc)
