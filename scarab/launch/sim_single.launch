@@ -1,11 +1,11 @@
 <launch>
 
   <arg name="agent"       default="scarab40"/>
-  <arg name="id"       default="0"/>
+  <arg name="id"          default="0"/>
   <arg name="rviz"        default="true"/>
 
   <!-- gazebo args -->
-  <arg name="world"       default="perch"/>
+  <arg name="world"       default="levine"/>
   <arg name="verbose"     default="false"/>
   <arg name="debug"       default="false"/>
   <arg name="gazebo_gui"  default="true"/>
