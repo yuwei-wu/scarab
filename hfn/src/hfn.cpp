@@ -97,69 +97,10 @@ void HumanFriendlyNav::setGoal(const geometry_msgs::PoseStamped &input) {
   goal_.orientation.z = 0.0;
   goal_.orientation.w = 1.0;
 
-  // Move goal_ to closest point on interior of polygon defined if it's on the
-  // outside
-  Point_2 old_goal(goal_.position.x, goal_.position.y);
-  if (CGAL::bounded_side_2(polygon_.vertices_begin(), polygon_.vertices_end(),
-                           old_goal, K()) == CGAL::ON_UNBOUNDED_SIDE) {
-    // Find closest vertex
-    Polygon_2::Vertex_iterator closest_v, it_v;
-    double min_dist_vertex = numeric_limits<double>::max();
-    for (it_v = polygon_.vertices_begin(); it_v != polygon_.vertices_end(); ++it_v) {
-      double dist = CGAL::squared_distance(old_goal, *it_v);
-      if (dist < min_dist_vertex) {
-        closest_v = it_v;
-        min_dist_vertex = dist;
-      }
-    }
-
-    // Find closest edge
-    Polygon_2::Edge_const_iterator closest_e, it_e;
-    double min_dist_edge = numeric_limits<double>::max();
-    for (it_e = polygon_.edges_begin(); it_e != polygon_.edges_end(); ++it_e) {
-      double dist = CGAL::squared_distance(old_goal, *it_e);
-      if (dist < min_dist_edge) {
-        closest_e = it_e;
-        min_dist_edge = dist;
-      }
-    }
-
-    // Pick object that's closet
-    if (min_dist_vertex < min_dist_edge) {
-      goal_.position.x = closest_v->x();
-      goal_.position.y = closest_v->y();
-    } else {
-      // Check if point when projected onto segment lies on segment
-      Vector_2 seg_vec = closest_e->to_vector();
-      Vector_2 point_vec(closest_e->source(), old_goal);
-
-      double dotprod = seg_vec * point_vec;
-      if (0.0 <= dotprod && dotprod <= seg_vec.squared_length()) {
-        // Point lies on segment
-        Vector_2 projection = dotprod / seg_vec.squared_length() * seg_vec;
-        goal_.position.x = closest_e->source().x() + projection.x();
-        goal_.position.y = closest_e->source().y() + projection.y();
-      } else {
-        // Point is not on segment, use closest vertex instead
-        goal_.position.x = closest_v->x();
-        goal_.position.y = closest_v->y();
-      }
-    }
-
-    Point_2 boundary_point(goal_.position.x, goal_.position.y);
-    Vector_2 direction(old_goal, boundary_point);
-    Vector_2 offset = direction / sqrt(direction.squared_length());
-    offset = offset * 0.8 * params_.waypoint_thresh;
-    goal_.position.x += offset.x();
-    goal_.position.y += offset.y();
-  }
-
-  Point_2 new_goal = Point_2(goal_.position.x, goal_.position.y);
-  if (CGAL::bounded_side_2(polygon_.vertices_begin(), polygon_.vertices_end(),
-                           new_goal, K()) == CGAL::ON_UNBOUNDED_SIDE) {
-    // ROS_WARN("Failed to move point to inside");
-    // ROS_BREAK();
-  }
+  geometry_msgs::Pose zero_pose;
+  double alpha_goal = atan2(goal_.position.y, goal_.position.x);
+  double distance_to_goal = linear_distance(goal_, zero_pose);
+  orientationToTwist(alpha_goal, distance_to_goal, goal_twist_);
 }
 
 void HumanFriendlyNav::setOdom(const nav_msgs::Odometry &input) {
@@ -426,24 +367,7 @@ HFNWrapper* HFNWrapper::ROSInit(ros::NodeHandle& nh) {
 }
 
 void HFNWrapper::ensureValidPose() {
-  if (flags_.have_map && flags_.have_pose) {
-    double startx = pose_.pose.position.x;
-    double starty = pose_.pose.position.y;
-    double newx, newy;
-    bool valid =
-      map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
-                         &newx, &newy);
-    if (!valid) {
-      ROS_WARN("Couldn't find valid starting position from (% .2f, % .2f)",
-               startx, starty);
-    } else if (startx != newx || starty != newy) {
-      ROS_WARN_THROTTLE(5.0, "Shifted position from (% .2f, % .2f) to (% .2f, % .2f)",
-               startx, starty, newx, newy);
-      pose_.pose.position.x = newx;
-      pose_.pose.position.y = newy;
-      hfn_->setPose(pose_);
-    }
-  }
+  return;
 }
 
 
@@ -588,11 +512,8 @@ string HFNWrapper::uninitializedString() {
 }
 
 void HFNWrapper::onLaserScan(const sensor_msgs::LaserScan &scan) {
+  (void)scan;
   flags_.have_laser = true;
-  hfn_->setLaserScan(scan);
-  inflated_pub_.publish(hfn_->inflatedScan());
-
-  pubPolygon(hfn_->inflatedPolygon());
 
   if (!initialized() || !active_) {
     return;
@@ -801,68 +722,7 @@ void HFNWrapper::setGoal(const vector<geometry_msgs::PoseStamped> &p) {
   path.push_back(Eigen::Vector2f(pose_.pose.position.x, pose_.pose.position.y));
   for (std::vector<geometry_msgs::PoseStamped>::iterator it = goals_.begin();
        it != goals_.end(); ++it) {
-    // Check if goals_ location is reachable
-    if (map_->getCell(it->pose.position.x, it->pose.position.y)->occ_dist <
-        params_.lethal_occ_dist) {
-
-      double startx = it->pose.position.x, starty = it->pose.position.y;
-      double newx, newy;
-      bool valid = map_->nearestPoint(startx, starty, params_.lethal_occ_dist,
-                                      &newx, &newy);
-      if (valid) {
-      ROS_WARN("HFNWrapper: Adjusted goal at %f %f", startx, starty);
-      it->pose.position.x = newx;
-      it->pose.position.y = newy;
-      } else {
-        ROS_WARN("HFNWrapper: UNREACHABLE (Goal at (%f, %f) is too close to obstacle)",
-                 it->pose.position.x, it->pose.position.y);
-        stop();
-        callback_(UNREACHABLE);
-        return;
-      }
-    }
-    // Plan a path to goals_ location
-    geometry_msgs::Pose last_pose;
-    std::cout << "the path.back() is " << path.back()<< std::endl;
-    Eigen::Vector2f cur_pos(0, 0);
-    double cur_time = (ros::Time::now() - traj_start_time_).toSec();
-    
-    //if the class is valid, use the cur_pos`
-    if (!cur_traj_.empty()){
-      cur_traj_.getPosition(cur_time, cur_pos);
-      std::cout << "the cur_pos is " << cur_pos(0) << " " << cur_pos(1) << std::endl;
-    }
-
-    // if the distance of cur_pos and path back is not large, use cur_pos
-    double dist = std::sqrt((cur_pos(0) - path.back()(0))*(cur_pos(0) - path.back()(0)) +
-                  (cur_pos(1) - path.back()(1))*(cur_pos(1) - path.back()(1)));
-    if (dist < 10 * params_.waypoint_spacing) {
-      last_pose.position.x = cur_pos(0);
-      last_pose.position.y = cur_pos(1);
-    } else {
-      last_pose.position.x = path.back()(0);
-      last_pose.position.y = path.back()(1);
-    }
-
-
-    if (linear_distance(last_pose, it->pose) > params_.waypoint_spacing) {
-      scarab::Path path_segment =
-        map_->astar(last_pose.position.x, last_pose.position.y,
-                    it->pose.position.x, it->pose.position.y,
-                    params_.lethal_occ_dist, params_.allow_unknown_path);
-      if (path_segment.size() != 0) {
-        for (size_t i=0; i<path_segment.size(); ++i) {
-          path.push_back(path_segment[i]);
-        }
-      } else {
-        ROS_WARN("HFNWrapper: UNREACHABLE (No path found to goal)");
-        stop();
-        callback_(UNREACHABLE);
-        return;
-      }
-    } else {
-      path.push_back(Eigen::Vector2f(it->pose.position.x, it->pose.position.y));
-    }
+    path.push_back(Eigen::Vector2f(it->pose.position.x, it->pose.position.y));
   }
 
   // Generate evenly spaced path
@@ -1032,11 +892,6 @@ bool HFNWrapper::updateWaypoint() {
   // Get closest visible waypoint
   Eigen::Vector2f pos(pose_.pose.position.x, pose_.pose.position.y);
   for (size_t wayind = 0; wayind < waypoints_.size(); ++wayind) {
-    if (!map_->lineOfSight(pos.x(), pos.y(),
-                           waypoints_[wayind].x(), waypoints_[wayind].y(),
-                           params_.los_margin, params_.allow_unknown_los)) {
-      continue;
-    }
     float dist = (pos - waypoints_[wayind]).squaredNorm();
     if (dist < min_dist) {
       min_dist = dist;
@@ -1049,10 +904,7 @@ bool HFNWrapper::updateWaypoint() {
     return false;
   } else {
     while (ind_delta < 20 &&
-           static_cast<unsigned>(min_ind + 1) < waypoints_.size() &&
-           map_->lineOfSight(pos.x(), pos.y(),
-                             waypoints_[min_ind+1].x(), waypoints_[min_ind+1].y(),
-                             params_.los_margin, params_.allow_unknown_los)) {
+           static_cast<unsigned>(min_ind + 1) < waypoints_.size()) {
       ++min_ind;
       ++ind_delta;
     }

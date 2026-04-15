@@ -2,7 +2,7 @@
 axle_width:          0.255
 robot_radius:        0.23
 safety_margin:       0.1
-social_margin:       0.2
+social_margin:       0.0
 waypoint_thresh:     0.2
 alpha_thresh:        2.094
 tau_1:               1.0   # stopping time for max velocity
@@ -19,8 +19,8 @@ lethal_occ_dist:     0.35  # distance at which robot is in collision
 goal_tolerance_ang:  3.15  # max angle difference for goal to be reached
 min_map_update:      2.0   # wait at least this time before updating map
 stop_on_preempt:     true  # stop the robot when a preempt command is received
-goal_tolerance:      0.2   # distance when goal is considered reached
-path_margin:         0.5   # max margin for path planning
+goal_tolerance:      0.3   # distance when goal is considered reached
+path_margin:         0.25   # max margin for path planning
 waypoint_spacing:    0.05  # max distance between waypoints
 los_margin:          0.2   # margin for line of sight checks
 timeout:             500.0 # time at which an action is aborted
