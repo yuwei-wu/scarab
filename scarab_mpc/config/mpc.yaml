@@ -2,38 +2,38 @@
 # First-pass settings for MPC tracking. The defaults are safe for bring-up and
 # do not publish motor commands unless explicitly enabled.
 
-# MPC discrete time step in seconds. 0.1 s corresponds to a 10 Hz controller.
-dt: 0.1
+# MPC discrete time step in seconds. 0.05 s corresponds to a 20 Hz prediction step.
+dt: 0.05
 
-# Number of MPC prediction steps. The prediction horizon is dt * N = 0.8 s.
-N: 8
+# Number of MPC prediction steps. The prediction horizon is dt * N = 0.75 s.
+N: 15
 
 # Minimum linear velocity in m/s. A negative value allows slight reverse motion;
 # set this to 0.0 for forward-only first hardware tests.
-v_min: -0.05
+v_min: 0.0
 
-# Maximum linear velocity in m/s. This is more conservative than HFN v_opt=0.3
-# and is intended for early MPC hardware tests.
-v_max: 0.30
+# Maximum linear velocity in m/s. This stays below HFN v_opt=0.3 and leaves
+# margin for turn tracking on hardware.
+v_max: 0.25
 
 # Maximum angular velocity in rad/s. This matches HFN w_max=0.6.
 omega_max: 0.60
 
 # Cruise speed used when timing the reference trajectory, in m/s. Keep it less
 # than or equal to v_max so the MPC has tracking margin.
-cruise_speed: 0.15
+cruise_speed: 0.2175
 
 # State tracking weights diag([x, y, theta]). Larger x/y weights track the path
 # more tightly; a larger theta weight tracks heading more tightly.
-Q: [80.0, 80.0, 4.0]
+Q: [55.0, 55.0, 3.0]
 
 # Control input weights diag([v, omega]). Larger values penalize aggressive
 # linear and angular velocity commands.
-R: [2.0, 0.8]
+R: [3.0, 3.0]
 
 # Terminal state weights diag([x, y, theta]). These are usually slightly larger
 # than Q to encourage the end of the horizon to stay close to the reference.
-Q_terminal: [120.0, 120.0, 6.0]
+Q_terminal: [70.0, 70.0, 4.0]
 
 # Minimum inter-robot safety distance in meters. Neighbor safety is disabled in
 # the current tracking mode, so this has no effect unless neighbor constraints
@@ -59,9 +59,9 @@ slack_min: -0.35
 # pub_traj_test_real.py.
 pose_timeout: 0.5
 
-# ROS control loop rate in Hz. This should match dt; 10 Hz corresponds to
-# dt = 0.1 s.
-control_rate: 10.0
+# ROS control loop rate in Hz. This should match dt; 20 Hz corresponds to
+# dt = 0.05 s.
+control_rate: 20.0
 
 # Delay in seconds after the first fresh pose before tracking starts. Use this
 # for synchronized starts or setup margin.
@@ -88,8 +88,8 @@ actual_path_max_poses: 2000
 tracking_error_log_period: 1.0
 
 # Maximum IPOPT iterations. Larger values may improve convergence but increase
-# solve time; check timing carefully for 10 Hz hardware runs.
-solver_max_iter: 60
+# solve time; check timing carefully for 20 Hz hardware runs.
+solver_max_iter: 100
 
 # IPOPT print level. 0 is silent; raise it temporarily when debugging solver
 # issues.
@@ -101,7 +101,7 @@ warm_start: true
 
 # Reference-speed scale factor for turning segments. When a large heading change
 # is detected, the reference speed is multiplied by this factor.
-turn_speed_factor: 0.5
+turn_speed_factor: 0.3
 
 # Turn detection threshold in radians. Adjacent segments whose heading change
 # exceeds this value are treated as turns and slowed down.
