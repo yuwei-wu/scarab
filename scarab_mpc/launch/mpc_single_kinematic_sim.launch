@@ -1,0 +1,92 @@
+<launch>
+
+  <!-- Single-robot closed-loop MPC test without Gazebo, HFN, or roboclaw.
+       kinematic_sim subscribes /<agent>/cmd_vel and publishes /<agent>/pose.
+       The MPC node waits for externally published /<agent>/move/goal waypoints.
+       pub_traj_test_real.py may be run separately as that external publisher.
+  -->
+
+  <arg name="agent"       default="scarab42" />
+  <arg name="robot_index" default="0" />
+
+  <!-- Defaults match traj1 robot1's first waypoint. -->
+  <arg name="spawn_x"     default="0.0" />
+  <arg name="spawn_y"     default="3.0" />
+  <arg name="spawn_yaw"   default="1.5708" />
+
+  <arg name="sim_rate"    default="50.0" />
+  <arg name="pose_rate"   default="20.0" />
+  <arg name="pose_topic"  default="pose" />
+  <arg name="goal_topic"  default="move/goal" />
+  <arg name="cmd_vel_topic" default="cmd_vel" />
+
+  <arg name="dry_run"     default="false" />
+  <arg name="publish_cmd" default="true" />
+  <arg name="reference_source" default="move_goal" />
+  <arg name="start_delay" default="0.0" />
+  <arg name="start_time"  default="" />
+  <arg name="mpc_config"  default="$(find scarab_mpc)/config/mpc.yaml" />
+
+  <arg name="monitor" default="true" />
+  <arg name="test_timeout" default="75.0" />
+  <arg name="test_goal_tolerance" default="0.35" />
+
+  <arg name="rviz" default="false" />
+  <arg name="rviz_config" default="$(find scarab_mpc)/rviz/mpc_single_kinematic_sim.rviz" />
+
+  <node pkg="kinematic_sim" type="kinematic_sim" name="$(arg agent)_kinematic_sim"
+        output="screen">
+    <param name="num_agents" value="1" />
+    <param name="agent_prefix" value="name" />
+    <param name="name0" value="$(arg agent)" />
+    <param name="initial0" value="$(arg spawn_x) $(arg spawn_y) $(arg spawn_yaw)" />
+    <param name="gt_pose_topic" value="$(arg pose_topic)" />
+    <param name="gt_odom_topic" value="gt_odom" />
+    <param name="base_frame_id" value="base_link" />
+    <param name="odom_frame_id" value="odom" />
+    <param name="global_frame_id" value="$(arg agent)/map" />
+    <param name="freq" value="$(arg sim_rate)" />
+    <param name="publish_freq" value="$(arg pose_rate)" />
+    <param name="pub_global_frame" value="true" />
+  </node>
+
+  <group ns="$(arg agent)">
+    <node name="mpc_controller" pkg="scarab_mpc" type="mpc_controller_node.py"
+          output="screen">
+      <rosparam command="load" file="$(arg mpc_config)" />
+      <param name="agent" value="$(arg agent)" />
+      <param name="robot_index" value="$(arg robot_index)" />
+      <param name="reference_source" value="$(arg reference_source)" />
+      <param name="dry_run" value="$(arg dry_run)" />
+      <param name="publish_cmd" value="$(arg publish_cmd)" />
+      <param name="start_delay" value="$(arg start_delay)" />
+      <param name="start_time" value="$(arg start_time)" />
+      <param name="pose_topic" value="/$(arg agent)/$(arg pose_topic)" />
+      <param name="goal_topic" value="/$(arg agent)/$(arg goal_topic)" />
+      <param name="cmd_vel_topic" value="/$(arg agent)/$(arg cmd_vel_topic)" />
+      <param name="frame_id" value="$(arg agent)/map" />
+    </node>
+  </group>
+
+  <node if="$(arg monitor)"
+        pkg="scarab_mpc"
+        type="mpc_sim_test_monitor.py"
+        name="$(arg agent)_mpc_sim_test_monitor"
+        output="screen"
+        required="true">
+    <param name="agent" value="$(arg agent)" />
+    <param name="pose_topic" value="/$(arg agent)/$(arg pose_topic)" />
+    <param name="status_topic" value="/$(arg agent)/mpc/status" />
+    <param name="reference_path_topic" value="/$(arg agent)/mpc/reference_path" />
+    <param name="timeout" value="$(arg test_timeout)" />
+    <param name="goal_tolerance" value="$(arg test_goal_tolerance)" />
+  </node>
+
+  <node if="$(arg rviz)"
+        pkg="rviz"
+        type="rviz"
+        name="$(arg agent)_mpc_rviz"
+        args="-d $(arg rviz_config)"
+        output="screen" />
+
+</launch>

@@ -1,0 +1,202 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Grid1
+        - /MPC Reference1
+        - /MPC Actual1
+        - /MPC Prediction1
+        - /Robot Pose1
+      Splitter Ratio: 0.58
+    Tree Height: 640
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Name: Time
+    SyncMode: 0
+    SyncSource: ""
+Preferences:
+  PromptSaveOnExit: false
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 12
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 1
+      Axes Length: 0.45
+      Axes Radius: 0.04
+      Class: rviz/Pose
+      Color: 255; 80; 80
+      Enabled: true
+      Head Length: 0.35
+      Head Radius: 0.12
+      Name: Robot Pose
+      Queue Size: 10
+      Shaft Length: 0.8
+      Shaft Radius: 0.05
+      Shape: Arrow
+      Topic: /scarab42/pose
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 0; 220; 90
+      Enabled: true
+      Head Diameter: 0.22
+      Head Length: 0.18
+      Length: 0.25
+      Line Style: Lines
+      Line Width: 0.06
+      Name: MPC Reference
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 0; 220; 90
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.03
+      Shaft Diameter: 0.08
+      Shaft Length: 0.1
+      Topic: /scarab42/mpc/reference_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 255; 190; 0
+      Enabled: true
+      Head Diameter: 0.22
+      Head Length: 0.18
+      Length: 0.25
+      Line Style: Lines
+      Line Width: 0.07
+      Name: MPC Actual
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 190; 0
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.03
+      Shaft Diameter: 0.08
+      Shaft Length: 0.1
+      Topic: /scarab42/mpc/actual_path
+      Unreliable: false
+      Value: true
+    - Alpha: 0.8
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 0; 180; 255
+      Enabled: true
+      Head Diameter: 0.2
+      Head Length: 0.16
+      Length: 0.22
+      Line Style: Lines
+      Line Width: 0.04
+      Name: MPC Prediction
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 0; 180; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.025
+      Shaft Diameter: 0.08
+      Shaft Length: 0.1
+      Topic: /scarab42/mpc/predicted_path
+      Unreliable: false
+      Value: true
+    - Class: rviz/TF
+      Enabled: false
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+      Marker Scale: 0.5
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Tree:
+        {}
+      Update Interval: 0
+      Value: false
+    - Alpha: 1
+      Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.025
+      Reference Frame: <Fixed Frame>
+      Show Trail: false
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 45; 45; 48
+    Default Light: true
+    Fixed Frame: scarab42/map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+  Value: true
+  Views:
+    Current:
+      Angle: 0
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Scale: 35
+      Target Frame: <Fixed Frame>
+      X: 1.0
+      Y: 5.5
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 900
+  Hide Left Dock: false
+  Hide Right Dock: true
+  Time:
+    collapsed: false
+  Views:
+    collapsed: true
+  Width: 1300
+  X: 40
+  Y: 40

@@ -1,0 +1,140 @@
+# Conservative first-pass parameters for real Scarab MPC tracking.
+# First-pass settings for MPC tracking. The defaults are safe for bring-up and
+# do not publish motor commands unless explicitly enabled.
+
+# MPC discrete time step in seconds. 0.1 s corresponds to a 10 Hz controller.
+dt: 0.1
+
+# Number of MPC prediction steps. The prediction horizon is dt * N = 0.8 s.
+N: 8
+
+# Minimum linear velocity in m/s. A negative value allows slight reverse motion;
+# set this to 0.0 for forward-only first hardware tests.
+v_min: -0.05
+
+# Maximum linear velocity in m/s. This is more conservative than HFN v_opt=0.3
+# and is intended for early MPC hardware tests.
+v_max: 0.30
+
+# Maximum angular velocity in rad/s. This matches HFN w_max=0.6.
+omega_max: 0.60
+
+# Cruise speed used when timing the reference trajectory, in m/s. Keep it less
+# than or equal to v_max so the MPC has tracking margin.
+cruise_speed: 0.15
+
+# State tracking weights diag([x, y, theta]). Larger x/y weights track the path
+# more tightly; a larger theta weight tracks heading more tightly.
+Q: [80.0, 80.0, 4.0]
+
+# Control input weights diag([v, omega]). Larger values penalize aggressive
+# linear and angular velocity commands.
+R: [2.0, 0.8]
+
+# Terminal state weights diag([x, y, theta]). These are usually slightly larger
+# than Q to encourage the end of the horizon to stay close to the reference.
+Q_terminal: [120.0, 120.0, 6.0]
+
+# Minimum inter-robot safety distance in meters. Neighbor safety is disabled in
+# the current tracking mode, so this has no effect unless neighbor constraints
+# are enabled later. HFN robot_radius + safety_margin = 0.33 is a per-robot
+# inflated radius, so a two-robot center distance would be about 0.66 m; traj1
+# and traj2 formation spacing may be smaller and should be retuned before use.
+d_safe_robot: 0.45
+
+# Obstacle safety distance in meters. Obstacle safety is not enabled in the
+# current tracking mode.
+d_safe_obstacle: 0.15
+
+# Safety slack penalty weight. Larger values discourage safety-distance
+# violations more strongly. Safety constraints are disabled in current tracking.
+w_slack: 200.0
+
+# Slack lower bound in meters. This limits how much safety constraints may be
+# relaxed when those constraints are enabled.
+slack_min: -0.35
+
+# Maximum allowed pose age in seconds. The node publishes stop after this
+# timeout. This is more conservative than the 1.0 s commonly used by
+# pub_traj_test_real.py.
+pose_timeout: 0.5
+
+# ROS control loop rate in Hz. This should match dt; 10 Hz corresponds to
+# dt = 0.1 s.
+control_rate: 10.0
+
+# Delay in seconds after the first fresh pose before tracking starts. Use this
+# for synchronized starts or setup margin.
+start_delay: 0.0
+
+# Absolute start time. Leave empty to disable. For multi-robot synchronization,
+# set an epoch timestamp or "YYYY-MM-DD HH:MM:SS".
+start_time: ""
+
+# Goal completion tolerance in meters. This currently matches HFN
+# goal_tolerance=0.3 for easier completion detection on hardware.
+goal_tolerance: 0.3
+
+# Minimum spacing in meters between recorded actual-path poses. Used for RViz
+# display on /<agent>/mpc/actual_path.
+actual_path_min_distance: 0.03
+
+# Maximum number of poses kept in the actual Path message. This prevents
+# unbounded Path growth during long runs.
+actual_path_max_poses: 2000
+
+# Tracking-error log period in seconds. Set to 0.0 to disable node-side
+# tracking-error prints.
+tracking_error_log_period: 1.0
+
+# Maximum IPOPT iterations. Larger values may improve convergence but increase
+# solve time; check timing carefully for 10 Hz hardware runs.
+solver_max_iter: 60
+
+# IPOPT print level. 0 is silent; raise it temporarily when debugging solver
+# issues.
+solver_print_level: 0
+
+# Whether to use the previous solution as the next initial guess. Keeping this
+# enabled usually improves sequential solve speed and stability.
+warm_start: true
+
+# Reference-speed scale factor for turning segments. When a large heading change
+# is detected, the reference speed is multiplied by this factor.
+turn_speed_factor: 0.5
+
+# Turn detection threshold in radians. Adjacent segments whose heading change
+# exceeds this value are treated as turns and slowed down.
+turn_angle_threshold: 0.5
+
+# Phase 1 mode: each node tracks one robot; multiple namespaced nodes may run in parallel.
+# Enable inter-robot safety constraints. Keep this false for the current
+# tracking-only mode to avoid introducing neighbor safety behavior.
+use_neighbor_safety: false
+
+# Reference source. The controller intentionally accepts only externally
+# published scarab_msgs/MoveActionGoal messages on /<agent>/move/goal.
+reference_source: move_goal
+
+# When a new external goal arrives, prepend the current pose if the first target
+# is not already near the robot. This mirrors HFN behavior: the controller drives
+# from the robot's current pose toward the first received waypoint.
+prepend_current_pose: true
+
+# Minimum distance in meters before prepending the current pose to a multi-pose
+# goal. Single-pose goals always use [current_pose, target_pose].
+prepend_current_pose_min_distance: 0.05
+
+# Keep these safe by default. Set dry_run:=false publish_cmd:=true in launch
+# only after confirming /<agent>/cmd_vel has no other publisher.
+# Dry-run mode solves and logs but does not publish /cmd_vel. Keep this true
+# before first hardware tests.
+dry_run: true
+
+# Whether the node may publish /<agent>/cmd_vel. Set this true only after
+# confirming HFN, teleop, or other controllers are not publishing cmd_vel.
+publish_cmd: false
+
+# Whether to publish one zero Twist on node shutdown. Keep this true for
+# hardware runs.
+stop_on_exit: true

@@ -1,0 +1,169 @@
+<launch>
+
+  <!-- Single-robot MPC test in the same Gazebo robot/diff-drive stack used by
+       the HFN sim launch, but without hfn_navigation or goal_to_action.
+
+       Chain:
+         Gazebo diff-drive subscribes /<agent>/cmd_vel
+         Gazebo/TF publishes /<agent>/ground_truth/*
+         scarab_mpc tf_pose_publisher_node.py publishes /<agent>/pose
+         scarab_mpc waits for externally published /<agent>/move/goal waypoints
+         pub_traj_test_real.py may be run separately as that external publisher
+  -->
+
+  <arg name="agent"       default="scarab42" />
+  <arg name="robot_index" default="0" />
+
+  <!-- Defaults match traj1 robot1's first waypoint. -->
+  <arg name="spawn_x"     default="0.0" />
+  <arg name="spawn_y"     default="3.0" />
+  <arg name="spawn_z"     default="1.0" />
+  <arg name="spawn_yaw"   default="1.5708" />
+
+  <arg name="world"       default="levine" />
+  <arg name="spawn_world_model" default="false" />
+  <arg name="verbose"     default="false" />
+  <arg name="debug"       default="false" />
+  <arg name="gazebo_gui"  default="true" />
+  <arg name="paused"      default="false" />
+
+  <arg name="camera"      default="false" />
+  <arg name="hokuyo"      default="true" />
+  <arg name="use_static_map" default="true" />
+  <arg name="static_map"  default="$(find scarab)/maps/empty_map.yaml" />
+
+  <arg name="base_frame"  default="$(arg agent)/base_footprint" />
+  <arg name="odom_frame"  default="$(arg agent)/odom" />
+  <arg name="map_frame"   default="$(arg agent)/map" />
+  <arg name="world_frame" default="world" />
+  <arg name="pose_topic"  default="pose" />
+  <arg name="goal_topic"  default="move/goal" />
+  <arg name="cmd_vel_topic" default="cmd_vel" />
+
+  <arg name="dry_run"     default="false" />
+  <arg name="publish_cmd" default="true" />
+  <arg name="stop_on_exit" default="true" />
+  <arg name="pose_timeout" default="0.75" />
+  <arg name="control_rate" default="10.0" />
+  <arg name="reference_source" default="move_goal" />
+  <arg name="start_delay" default="0.0" />
+  <arg name="start_time"  default="" />
+  <arg name="mpc_config"  default="$(find scarab_mpc)/config/mpc.yaml" />
+
+  <arg name="monitor" default="true" />
+  <arg name="test_timeout" default="120.0" />
+  <arg name="test_goal_tolerance" default="0.35" />
+
+  <arg name="rviz" default="false" />
+  <arg name="rviz_config" default="$(find scarab_mpc)/rviz/mpc_single_gazebo.rviz" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find scarab_gazebo)/worlds/$(arg world).world" />
+    <arg name="gui" value="$(arg gazebo_gui)" />
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="verbose" value="$(arg verbose)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="use_sim_time" value="true" />
+  </include>
+
+  <node name="world_model_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+        args="-sdf -model $(arg world)
+              -file $(find scarab_gazebo)/models/$(arg world)/model.sdf"
+        if="$(arg spawn_world_model)" />
+
+  <group ns="$(arg agent)">
+
+    <!-- Same TF scaffold as scarab/launch/scarab_sim.launch. -->
+    <node pkg="tf2_ros"
+          type="static_transform_publisher"
+          name="world_static_tf_broadcaster"
+          args="0 0 0 0 0 0 $(arg world_frame) $(arg map_frame)" />
+
+    <node pkg="tf2_ros"
+          type="static_transform_publisher"
+          name="dummy_slam_static_tf_broadcaster"
+          args="0 0 0 0 0 0 $(arg map_frame) $(arg odom_frame)" />
+
+    <node pkg="tf2_ros"
+          type="static_transform_publisher"
+          name="odom_static_tf_broadcaster"
+          args="0 0 0 0 0 0 $(arg odom_frame) $(arg agent)/ground_truth/odom" />
+
+    <node pkg="tf2_ros"
+          type="static_transform_publisher"
+          name="base_static_tf_broadcaster"
+          args="0 0 0 0 0 0 $(arg agent)/ground_truth/base_link $(arg base_frame)" />
+
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find scarab_description)/urdf/scarab.xacro
+                    tf_prefix:=$(arg agent) camera:=$(arg camera) hokuyo:=$(arg hokuyo)" />
+
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-urdf -model $(arg agent) -param /$(arg agent)/robot_description
+                -x $(arg spawn_x) -y $(arg spawn_y) -z $(arg spawn_z) -Y $(arg spawn_yaw)" />
+
+    <node name="robot_state_publisher"
+          pkg="robot_state_publisher"
+          type="robot_state_publisher" />
+
+    <node name="joint_state_publisher"
+          pkg="joint_state_publisher"
+          type="joint_state_publisher" />
+
+    <node pkg="scarab" name="map" type="static_map_publisher.py" output="screen"
+          if="$(arg use_static_map)">
+      <param name="map_file" value="$(arg static_map)" />
+      <param name="frame_id" value="$(arg map_frame)" />
+    </node>
+
+    <!-- Pose publisher only. HFN controller and goal_to_action are intentionally
+         not launched. -->
+    <node name="pose" pkg="scarab_mpc" type="tf_pose_publisher_node.py" output="screen">
+      <param name="base_frame_id" value="$(arg base_frame)" />
+      <param name="map_frame_id" value="$(arg map_frame)" />
+      <remap from="pose" to="$(arg pose_topic)" />
+    </node>
+
+    <node name="mpc_controller" pkg="scarab_mpc" type="mpc_controller_node.py"
+          output="screen">
+      <rosparam command="load" file="$(arg mpc_config)" />
+      <param name="agent" value="$(arg agent)" />
+      <param name="robot_index" value="$(arg robot_index)" />
+      <param name="reference_source" value="$(arg reference_source)" />
+      <param name="dry_run" value="$(arg dry_run)" />
+      <param name="publish_cmd" value="$(arg publish_cmd)" />
+      <param name="stop_on_exit" value="$(arg stop_on_exit)" />
+      <param name="pose_timeout" value="$(arg pose_timeout)" />
+      <param name="control_rate" value="$(arg control_rate)" />
+      <param name="start_delay" value="$(arg start_delay)" />
+      <param name="start_time" value="$(arg start_time)" />
+      <param name="pose_topic" value="/$(arg agent)/$(arg pose_topic)" />
+      <param name="goal_topic" value="/$(arg agent)/$(arg goal_topic)" />
+      <param name="cmd_vel_topic" value="/$(arg agent)/$(arg cmd_vel_topic)" />
+      <param name="frame_id" value="$(arg map_frame)" />
+    </node>
+
+  </group>
+
+  <node if="$(arg monitor)"
+        pkg="scarab_mpc"
+        type="mpc_sim_test_monitor.py"
+        name="$(arg agent)_mpc_gazebo_test_monitor"
+        output="screen"
+        required="true">
+    <param name="agent" value="$(arg agent)" />
+    <param name="pose_topic" value="/$(arg agent)/$(arg pose_topic)" />
+    <param name="status_topic" value="/$(arg agent)/mpc/status" />
+    <param name="reference_path_topic" value="/$(arg agent)/mpc/reference_path" />
+    <param name="timeout" value="$(arg test_timeout)" />
+    <param name="goal_tolerance" value="$(arg test_goal_tolerance)" />
+  </node>
+
+  <node if="$(arg rviz)"
+        pkg="rviz"
+        type="rviz"
+        name="$(arg agent)_mpc_gazebo_rviz"
+        args="-d $(arg rviz_config)"
+        output="screen" />
+
+</launch>
