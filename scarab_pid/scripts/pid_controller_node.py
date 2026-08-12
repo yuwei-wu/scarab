@@ -397,6 +397,11 @@ class ScarabPIDNode:
         self.tracking_start_time = None
         self.finished = False
         self._reset_controller()
+        # Fresh actual-path recording per goal: without this the RViz /
+        # plot_tracking overlay accumulates every previous run in the node's
+        # lifetime and corrupts the path-deviation numbers.
+        self.actual_path.poses = []
+        self.actual_path_pub.publish(self.actual_path)
         self._publish_reference_path()
 
         rospy.loginfo(
