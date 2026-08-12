@@ -41,8 +41,8 @@
 # 1 / control_rate.
 dt: 0.05
 
-# ROS control loop rate in Hz. Must match dt. 20 Hz is ~80x the fastest
-# closed-loop bandwidth (kp_heading = 1.5 rad/s), which is plenty. Raising it
+# ROS control loop rate in Hz. Must match dt. 20 Hz is ~70x the fastest
+# closed-loop bandwidth (kp_heading = 1.8 rad/s), which is plenty. Raising it
 # buys nothing unless the pose rate rises with it -- see pose_rate in
 # pid_navigation.launch (50 Hz; the tf_pose_publisher default of 10 Hz would
 # starve the loop).
@@ -58,10 +58,10 @@ control_rate: 20.0
 v_min: 0.0
 
 # Maximum linear velocity in m/s.
-v_max: 0.25
+v_max: 0.3
 
 # Maximum angular velocity in rad/s.
-omega_max: 0.60
+omega_max: 1
 
 # ===========================================================================
 # Reference trajectory
@@ -115,7 +115,7 @@ turn_angle_threshold: 0.5
 #     ki_along = 0.4  ->  0.20 cm rms   (settles at t=4.7 s)
 #     ki_along = 0.8  ->  0.11 cm rms   (settles at t=4.0 s)   <- chosen
 #     ki_along = 2.0  ->  0.17 cm rms   (overshoots)
-kp_along: 1.2
+kp_along: 1.5
 ki_along: 0.8
 # Left at zero: pose noise differentiates badly and the feedforward already
 # supplies the reference rate.
@@ -126,14 +126,14 @@ kd_along: 0.0
 # factor in Kanayama's law (not configurable: a differential drive cannot
 # move sideways, so a stationary robot must never spin to fix a lateral
 # offset).
-kp_cross: 2.0
-ki_cross: 0.0
+kp_cross: 3
+ki_cross: 0.1
 kd_cross: 0.15
 
 # ---- Heading: corrects omega, damps the cross-track loop ------------------
 # kp_heading is the damping term of the cross-track second-order loop.
 # Lowering it while raising kp_cross is what makes the robot weave.
-kp_heading: 1.5
+kp_heading: 1.8
 ki_heading: 0.0
 kd_heading: 0.05
 
@@ -228,3 +228,4 @@ tracking_error_log_period: 1.0
 dry_run: true
 publish_cmd: false
 stop_on_exit: true
+
