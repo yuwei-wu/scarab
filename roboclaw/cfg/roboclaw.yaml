@@ -5,7 +5,7 @@ quad_pulse_per_motor_rev:         2000.0
 motor_to_wheel_ratio:             38.35
 max_wheel_vel:                    0.8
 min_wheel_vel:                    0.00
-accel_max:                        0.05              # m/s^2
+accel_max:                        0.3              # m/s^2 was 0.05
 pid_p:                            0.04
 pid_i:                            0.3
 pid_d:                            10.0
