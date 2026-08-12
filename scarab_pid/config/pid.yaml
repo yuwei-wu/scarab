@@ -1,0 +1,230 @@
+# Trajectory-tracking PID parameters for real Scarabs.
+#
+# This package is independent of scarab_mpc. It consumes the same inputs
+# (/<agent>/pose, /<agent>/move/goal) and produces the same output
+# (/<agent>/cmd_vel), so pub_pid/pub_pid_traj.py and the older pub_traj
+# scripts drive it unchanged. Never run scarab_pid and scarab_mpc on the same
+# robot at once.
+#
+# The controller is a standard trajectory-tracking PID (Kanayama structure):
+# feedforward (v_ref, omega_ref) plus three PID channels on the body-frame
+# error taken at the CURRENT reference time.
+#
+# There is deliberately no lookahead/preview parameter and no horizon.
+# Preview was measured and removed: cross-track rms in cm, same controller,
+# three reference types:
+#
+#   lookahead   box-push arc   sharp L polyline   smooth figure-8
+#     0.00 s        0.47             8.16              1.58
+#     0.10 s        0.58             7.84              0.98
+#     0.30 s        1.45             7.15              4.18
+#     0.75 s        3.70             5.33             11.96
+#
+# Beyond ~0.1 s preview clearly hurts every feasible reference (it aims at a
+# point that has already rotated around the curve, cutting to the inside);
+# at 0.1 s the differences are sub-centimeter either way. Only the sharp
+# polyline prefers preview, and it does so because its reference is
+# infeasible (heading jumps 90 deg in one step). Fix that in the trajectory
+# (densify / round the corner / slower stamps into it, see pub_pid), not in
+# the controller.
+#
+# Defaults are conservative: no motor output until dry_run:=false and
+# publish_cmd:=true are passed explicitly.
+
+# ===========================================================================
+# Timing
+# ===========================================================================
+
+# Nominal control period in seconds. 0.05 s = 20 Hz. The controller measures
+# its true period every cycle for the I and D terms; this value is the
+# first-cycle fallback and the RViz rollout grid. Keep it equal to
+# 1 / control_rate.
+dt: 0.05
+
+# ROS control loop rate in Hz. Must match dt. 20 Hz is ~80x the fastest
+# closed-loop bandwidth (kp_heading = 1.5 rad/s), which is plenty. Raising it
+# buys nothing unless the pose rate rises with it -- see pose_rate in
+# pid_navigation.launch (50 Hz; the tf_pose_publisher default of 10 Hz would
+# starve the loop).
+control_rate: 20.0
+
+# ===========================================================================
+# Robot limits
+# ===========================================================================
+
+# Minimum linear velocity in m/s. 0.0 means forward-only: if the robot
+# overshoots, it coasts and waits for the reference to catch up rather than
+# reversing into the box.
+v_min: 0.0
+
+# Maximum linear velocity in m/s.
+v_max: 0.25
+
+# Maximum angular velocity in rad/s.
+omega_max: 0.60
+
+# ===========================================================================
+# Reference trajectory
+# ===========================================================================
+
+# Cruise speed in m/s, used to time the waypoints ONLY when the goal carries
+# no usable per-pose stamps (pub_pid always stamps; this is the fallback for
+# legacy publishers). It also normalizes the cross-track speed gate below.
+#
+# It is further the accuracy budget: the controller can only correct an error
+# using the velocity authority left between cruise_speed and v_max.
+# Measured in closed-loop sim on a 90 deg corner with a weak drivetrain
+# (along-track rms error):
+#     0.2175 (15% headroom under v_max) -> 6.46 cm
+#     0.1800 (39% headroom)             -> 2.24 cm
+#     0.1500 (67% headroom)             -> 1.55 cm
+# Kept at 0.2175 to match scarab_mpc/config/mpc.yaml so PID and MPC runs are
+# directly comparable. For the box push, drop it to ~0.18 once basic tracking
+# is confirmed.
+cruise_speed: 0.2175
+
+# Vertex heading change in radians above which a waypoint counts as a corner
+# rather than a sample of a smooth curve. At or below this, omega_ref is
+# reconstructed from chord heading differences -- dense timed trajectories
+# from gen_trajectory.py (3 deg steps) rely on that feedforward to hold
+# curves. Above it the reconstruction would smear a discrete turn along the
+# whole incoming segment and push the robot sideways off the straight, so
+# corners get omega_ref = 0 and the heading channel (plus align mode) takes
+# them instead.
+turn_angle_threshold: 0.5
+
+# ===========================================================================
+# PID gains
+# ===========================================================================
+# Errors are expressed in the robot body frame and logged every cycle on
+# /<agent>/pid/status, so tune from data rather than by eye:
+#   e_along    forward error   (+ = reference is ahead, robot is late)
+#   e_cross    lateral error   (+ = reference is to the left)
+#   e_heading  heading error   (+ = robot must turn left)
+
+# ---- Along-track: corrects v, owns schedule accuracy ----------------------
+# This is the channel that matters for two robots pushing one box. The
+# feedforward already supplies v_ref, so kp only rejects disturbances; ki
+# removes the residual lag from motor deadband, friction, and the roboclaw
+# velocity loop. Without ki, two robots settle at different lags and the box
+# rotates.
+#
+# Measured in closed-loop sim, two robots with a 6% drivetrain mismatch,
+# reporting the A-vs-B schedule mismatch that rotates the box:
+#     ki_along = 0.0  ->  0.98 cm rms   (never converges)
+#     ki_along = 0.4  ->  0.20 cm rms   (settles at t=4.7 s)
+#     ki_along = 0.8  ->  0.11 cm rms   (settles at t=4.0 s)   <- chosen
+#     ki_along = 2.0  ->  0.17 cm rms   (overshoots)
+kp_along: 1.2
+ki_along: 0.8
+# Left at zero: pose noise differentiates badly and the feedforward already
+# supplies the reference rate.
+kd_along: 0.0
+
+# ---- Cross-track: corrects omega, owns path accuracy ----------------------
+# The correction is always scaled by min(1, |v_ref| / cruise_speed), the v_r
+# factor in Kanayama's law (not configurable: a differential drive cannot
+# move sideways, so a stationary robot must never spin to fix a lateral
+# offset).
+kp_cross: 2.0
+ki_cross: 0.0
+kd_cross: 0.15
+
+# ---- Heading: corrects omega, damps the cross-track loop ------------------
+# kp_heading is the damping term of the cross-track second-order loop.
+# Lowering it while raising kp_cross is what makes the robot weave.
+kp_heading: 1.5
+ki_heading: 0.0
+kd_heading: 0.05
+
+# ---- Integral clamps, in output units (m/s for along, rad/s for the rest) --
+# i_max_along of 0.08 m/s is ~37% of cruise_speed: enough to cancel realistic
+# drivetrain lag, not enough to let the robot surge if it is ever blocked.
+i_max_along: 0.08
+i_max_cross: 0.15
+i_max_heading: 0.15
+
+# Low-pass time constant in seconds for all derivative terms. Vicon pose
+# differentiated raw is mostly noise; 0.08 s is about 2 Hz. Only meaningful
+# when the pose actually updates faster than the filter -- keep the pose
+# publisher at or above control_rate (the launch file sets 50 Hz).
+d_filter_tau: 0.08
+
+# ===========================================================================
+# Command shaping
+# ===========================================================================
+
+# Linear acceleration limit in m/s^2 applied to the command. An MPC produced
+# smooth commands as a by-product of its cost function; a PID does not, and
+# jerky commands slip the wheels and cost tracking accuracy.
+a_max: 0.6
+
+# Angular acceleration limit in rad/s^2 applied to the command.
+alpha_max: 2.5
+
+# Heading error in radians above which the robot mostly stops and rotates in
+# place. 1.2 rad is about 69 deg. Triggers on a bad initial heading and at
+# sharp polyline corners. While it is active the along-track integral is
+# frozen so it cannot wind up during the rotation.
+align_angle: 1.2
+
+# Linear speed scale while |e_heading| > align_angle. 0.0 = pure rotation
+# until the robot is pointed the right way. Raise to ~0.2 if in-place
+# rotation stutters on the real floor.
+align_speed_factor: 0.0
+
+# ===========================================================================
+# Node behaviour
+# ===========================================================================
+
+# Read per-pose arrival times from PoseStamped.header.stamp in the goal and
+# use them as the reference timeline. This is how an externally generated
+# reference trajectory is delivered (pub_pid). Stamps must be positive and
+# strictly increasing; otherwise the node falls back to cruise_speed timing,
+# which keeps the older identically-stamped publishers working.
+use_goal_stamps: true
+
+# Maximum allowed pose age in seconds. The node publishes stop after this.
+pose_timeout: 0.5
+
+# Delay in seconds after the first fresh pose before tracking starts.
+start_delay: 0.0
+
+# Absolute start time. Leave empty to disable. For multi-robot synchronization
+# set the SAME epoch timestamp or "YYYY-MM-DD HH:MM:SS" on every robot, and
+# make sure their clocks are synchronized (chrony/NTP). Without this, each
+# robot starts its clock when its goal happens to arrive.
+start_time: ""
+
+# Goal completion tolerance in meters. The trajectory counts as finished once
+# the schedule has elapsed, the robot is inside this radius, AND the command
+# has ramped down to near zero (so finishing never steps cmd_vel).
+goal_tolerance: 0.3
+
+# When a new goal arrives, prepend the current pose if the first target is not
+# already near the robot, so the robot drives from where it actually is.
+prepend_current_pose: true
+prepend_current_pose_min_distance: 0.05
+
+# ===========================================================================
+# Visualization / logging
+# ===========================================================================
+
+# Length in dt steps of the constant-command rollout published on
+# /<agent>/pid/predicted_path for RViz. Display only; no effect on control.
+predict_steps: 30
+
+# RViz actual-path recording on /<agent>/pid/actual_path.
+actual_path_min_distance: 0.03
+actual_path_max_poses: 2000
+
+# Tracking-error log period in seconds. Set 0.0 to disable.
+tracking_error_log_period: 1.0
+
+# ===========================================================================
+# Safety gates. Set dry_run:=false publish_cmd:=true in the launch command
+# only after confirming nothing else publishes /<agent>/cmd_vel.
+# ===========================================================================
+dry_run: true
+publish_cmd: false
+stop_on_exit: true

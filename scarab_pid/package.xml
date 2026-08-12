@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>scarab_pid</name>
+  <version>0.0.0</version>
+  <description>
+    ROS PID trajectory-tracking controller for Scarab differential-drive
+    robots. Independent of scarab_mpc: separate config, reference generator,
+    and node. Both packages expose the same ROS interface, so the same
+    waypoint publisher drives either controller.
+  </description>
+  <maintainer email="grasp@localhost.local">grasp</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>scarab_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>map_server</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>scarab</run_depend>
+  <run_depend>scarab_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
+</package>
